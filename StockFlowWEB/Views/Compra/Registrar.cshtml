@@ -1,0 +1,1567 @@
+﻿@using System.Text.Json
+@model StockFlowWEB.Models.ViewModels.CompraFormViewModel
+
+@{
+    ViewData["Title"] = "Nueva compra";
+
+
+    var productosJson =
+        JsonSerializer.Serialize(
+            Model.Productos.Select(
+                x => new
+                {
+                    idProducto = x.IdProducto,
+                    codigo = x.Codigo,
+                    nombre = x.Nombre,
+                    precioCompra = x.PrecioCompra,
+                    stockActual = x.StockActual
+                }
+            )
+        );
+
+
+    var detallesJson =
+        JsonSerializer.Serialize(
+            Model.Detalles.Select(
+                x => new
+                {
+                    idProducto = x.IdProducto,
+                    cantidad = x.Cantidad,
+                    precioUnitario = x.PrecioUnitario
+                }
+            )
+        );
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Nueva compra
+        </h1>
+
+        <p>
+            Registra mercancía recibida de un proveedor.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div asp-validation-summary="ModelOnly"
+     class="alert alert-danger">
+</div>
+
+
+<form asp-action="Registrar"
+      method="post"
+      id="formCompra">
+
+
+    <!-- DATOS GENERALES -->
+
+    <div class="content-card mb-4">
+
+        <div class="content-card-header">
+
+            <h5>
+                Información de la compra
+            </h5>
+
+        </div>
+
+
+        <div class="content-card-body">
+
+            <div class="row g-4">
+
+
+                <div class="col-md-8">
+
+                    <label asp-for="IdProveedor"
+                           class="form-label">
+
+                        Proveedor
+
+                    </label>
+
+
+                    <select asp-for="IdProveedor"
+                            class="form-select">
+
+                        <option value="0">
+                            Seleccione un proveedor
+                        </option>
+
+
+                        @foreach (var proveedor in Model.Proveedores)
+                        {
+                            <option value="@proveedor.IdProveedor">
+
+                                @proveedor.Nombre
+
+                            </option>
+                        }
+
+                    </select>
+
+
+                    <span asp-validation-for="IdProveedor"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label asp-for="PorcentajeImpuesto"
+                           class="form-label">
+
+                        Impuesto %
+
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <input asp-for="PorcentajeImpuesto"
+                               type="number"
+                               min="0"
+                               max="100"
+                               step="0.01"
+                               class="form-control"
+                               id="porcentajeImpuesto" />
+
+                        <span class="input-group-text">
+                            %
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- AGREGAR PRODUCTOS -->
+
+    <div class="content-card mb-4">
+
+        <div class="content-card-header">
+
+            <h5>
+                Productos
+            </h5>
+
+            <p>
+                Agrega los productos recibidos en esta compra.
+            </p>
+
+        </div>
+
+
+        <div class="content-card-body border-bottom">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-xl-5">
+
+                    <label class="form-label">
+                        Producto
+                    </label>
+
+
+                    <select id="productoSelector"
+                            class="form-select">
+
+                        <option value="">
+                            Seleccione un producto
+                        </option>
+
+
+                        @foreach (var producto in Model.Productos)
+                        {
+                            <option value="@producto.IdProducto">
+
+                                @producto.Codigo - @producto.Nombre
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <label class="form-label">
+                        Cantidad
+                    </label>
+
+                    <input type="number"
+                           id="cantidadNueva"
+                           class="form-control"
+                           min="0.001"
+                           step="0.001"
+                           value="1" />
+
+                </div>
+
+
+                <div class="col-xl-3 col-md-4">
+
+                    <label class="form-label">
+                        Costo unitario
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            ₡
+                        </span>
+
+                        <input type="number"
+                               id="precioNuevo"
+                               class="form-control"
+                               min="0.01"
+                               step="0.01" />
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <button type="button"
+                            class="btn btn-primary w-100"
+                            id="agregarProducto">
+
+                        <i class="bi bi-plus-lg me-1"></i>
+
+                        Agregar
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table table-modern mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Producto</th>
+
+                        <th style="width: 150px;">
+                            Cantidad
+                        </th>
+
+                        <th style="width: 190px;">
+                            Costo
+                        </th>
+
+                        <th style="width: 180px;">
+                            Subtotal
+                        </th>
+
+                        <th style="width: 70px;"></th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="detalleCompra">
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div id="sinProductos"
+             class="empty-state">
+
+            <i class="bi bi-cart-plus"></i>
+
+            <strong class="d-block">
+                Todavía no has agregado productos
+            </strong>
+
+            <span>
+                Selecciona un producto arriba para comenzar.
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- RESUMEN -->
+
+    <div class="row justify-content-end">
+
+        <div class="col-xl-5 col-lg-6">
+
+            <div class="content-card">
+
+                <div class="content-card-header">
+
+                    <h5>
+                        Resumen
+                    </h5>
+
+                </div>
+
+
+                <div class="content-card-body">
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Subtotal
+                        </span>
+
+                        <strong id="subtotalTexto">
+                            ₡0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Impuesto
+                        </span>
+
+                        <strong id="impuestoTexto">
+                            ₡0.00
+                        </strong>
+
+                    </div>
+
+
+                    <hr />
+
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <strong>
+                            Total
+                        </strong>
+
+                        <strong class="fs-4"
+                                id="totalTexto">
+
+                            ₡0.00
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+
+        <a asp-action="Index"
+           class="btn btn-light">
+
+            Cancelar
+
+        </a>
+
+
+        <button type="submit"
+                class="btn btn-primary btn-lg"
+                id="btnRegistrarCompra">
+
+            <i class="bi bi-check-circle me-1"
+               id="iconoRegistrarCompra"></i>
+
+            <span id="textoRegistrarCompra">
+                Registrar compra
+            </span>
+
+        </button>
+
+    </div>
+
+
+</form>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+
+        // =========================================================
+        // DATOS INICIALES
+        // =========================================================
+
+        const productos =
+                    @Html.Raw(productosJson);
+
+
+        let detalles =
+                    @Html.Raw(detallesJson);
+
+
+        // =========================================================
+        // ELEMENTOS
+        // =========================================================
+
+        const formCompra =
+            document.getElementById(
+                "formCompra"
+            );
+
+
+        const selector =
+            document.getElementById(
+                "productoSelector"
+            );
+
+
+        const cantidadNueva =
+            document.getElementById(
+                "cantidadNueva"
+            );
+
+
+        const precioNuevo =
+            document.getElementById(
+                "precioNuevo"
+            );
+
+
+        const agregarProducto =
+            document.getElementById(
+                "agregarProducto"
+            );
+
+
+        const tabla =
+            document.getElementById(
+                "detalleCompra"
+            );
+
+
+        const sinProductos =
+            document.getElementById(
+                "sinProductos"
+            );
+
+
+        const porcentajeImpuesto =
+            document.getElementById(
+                "porcentajeImpuesto"
+            );
+
+
+        const subtotalTexto =
+            document.getElementById(
+                "subtotalTexto"
+            );
+
+
+        const impuestoTexto =
+            document.getElementById(
+                "impuestoTexto"
+            );
+
+
+        const totalTexto =
+            document.getElementById(
+                "totalTexto"
+            );
+
+
+        const btnRegistrarCompra =
+            document.getElementById(
+                "btnRegistrarCompra"
+            );
+
+
+        const iconoRegistrarCompra =
+            document.getElementById(
+                "iconoRegistrarCompra"
+            );
+
+
+        const textoRegistrarCompra =
+            document.getElementById(
+                "textoRegistrarCompra"
+            );
+
+
+        // =========================================================
+        // ESTADO
+        // =========================================================
+
+        let envioEnCurso =
+            false;
+
+
+        // =========================================================
+        // FORMATO MONEDA
+        // =========================================================
+
+        const formatoCRC =
+            new Intl.NumberFormat(
+                "es-CR",
+                {
+                    style:
+                        "currency",
+
+                    currency:
+                        "CRC"
+                }
+            );
+
+
+        // =========================================================
+        // BUSCAR PRODUCTO
+        // =========================================================
+
+        function obtenerProducto(
+            idProducto) {
+            return productos.find(
+                x =>
+                    Number(
+                        x.idProducto
+                    )
+                    ===
+                    Number(
+                        idProducto
+                    )
+            );
+        }
+
+
+        // =========================================================
+        // PRODUCTO SELECCIONADO
+        // =========================================================
+
+        selector.addEventListener(
+            "change",
+            function() {
+                const producto =
+                    obtenerProducto(
+                        this.value
+                    );
+
+
+                if (producto) {
+                    precioNuevo.value =
+                        producto.precioCompra;
+                }
+                else {
+                    precioNuevo.value =
+                        "";
+                }
+            }
+        );
+
+
+        // =========================================================
+        // AGREGAR PRODUCTO
+        // =========================================================
+
+        agregarProducto.addEventListener(
+            "click",
+            function() {
+                const idProducto =
+                    Number(
+                        selector.value
+                    );
+
+
+                const cantidad =
+                    Number(
+                        cantidadNueva.value
+                    );
+
+
+                const precio =
+                    Number(
+                        precioNuevo.value
+                    );
+
+
+                const producto =
+                    obtenerProducto(
+                        idProducto
+                    );
+
+
+                // =================================================
+                // VALIDACIONES
+                // =================================================
+
+                if (!producto) {
+                    alert(
+                        "Seleccione un producto."
+                    );
+
+                    selector.focus();
+
+                    return;
+                }
+
+
+                if (!Number.isFinite(cantidad) ||
+                    cantidad <= 0) {
+                    alert(
+                        "La cantidad debe ser mayor a cero."
+                    );
+
+                    cantidadNueva.focus();
+
+                    return;
+                }
+
+
+                if (!Number.isFinite(precio) ||
+                    precio <= 0) {
+                    alert(
+                        "El costo debe ser mayor a cero."
+                    );
+
+                    precioNuevo.focus();
+
+                    return;
+                }
+
+
+                const existente =
+                    detalles.some(
+                        x =>
+                            Number(
+                                x.idProducto
+                            )
+                            ===
+                            idProducto
+                    );
+
+
+                if (existente) {
+                    alert(
+                        "Este producto ya fue agregado."
+                    );
+
+                    return;
+                }
+
+
+                // =================================================
+                // AGREGAR
+                // =================================================
+
+                detalles.push(
+                    {
+                        idProducto:
+                            idProducto,
+
+                        cantidad:
+                            cantidad,
+
+                        precioUnitario:
+                            precio
+                    }
+                );
+
+
+                // =================================================
+                // LIMPIAR CAMPOS
+                // =================================================
+
+                selector.value =
+                    "";
+
+
+                cantidadNueva.value =
+                    "1";
+
+
+                precioNuevo.value =
+                    "";
+
+
+                renderizar();
+            }
+        );
+
+
+        // =========================================================
+        // ELIMINAR
+        // =========================================================
+
+        function eliminarProducto(
+            indice) {
+            if (indice < 0 ||
+                indice >= detalles.length) {
+                return;
+            }
+
+
+            detalles.splice(
+                indice,
+                1
+            );
+
+
+            renderizar();
+        }
+
+
+        // =========================================================
+        // CAMBIAR CANTIDAD
+        // =========================================================
+
+        function cambiarCantidad(
+            indice,
+            valor) {
+            const cantidad =
+                Number(
+                    valor
+                );
+
+
+            if (!Number.isFinite(cantidad) ||
+                cantidad <= 0) {
+                alert(
+                    "La cantidad debe ser mayor a cero."
+                );
+
+
+                // Volvemos a dibujar para restaurar
+                // el valor anterior válido.
+                renderizar();
+
+                return;
+            }
+
+
+            if (!detalles[indice]) {
+                return;
+            }
+
+
+            detalles[indice].cantidad =
+                cantidad;
+
+
+            actualizarTotales();
+        }
+
+
+        // =========================================================
+        // CAMBIAR COSTO
+        // =========================================================
+
+        function cambiarPrecio(
+            indice,
+            valor) {
+            const precio =
+                Number(
+                    valor
+                );
+
+
+            if (!Number.isFinite(precio) ||
+                precio <= 0) {
+                alert(
+                    "El costo debe ser mayor a cero."
+                );
+
+
+                renderizar();
+
+                return;
+            }
+
+
+            if (!detalles[indice]) {
+                return;
+            }
+
+
+            detalles[indice]
+                .precioUnitario =
+                precio;
+
+
+            actualizarTotales();
+        }
+
+
+        // =========================================================
+        // CREAR CELDA PRODUCTO
+        //
+        // IMPORTANTE:
+        //
+        // No usamos innerHTML.
+        // Nombre/código van por textContent.
+        // =========================================================
+
+        function crearCeldaProducto(
+            producto,
+            detalle,
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const nombre =
+                document.createElement(
+                    "strong"
+                );
+
+
+            nombre.textContent =
+                producto.nombre ?? "";
+
+
+            const codigo =
+                document.createElement(
+                    "div"
+                );
+
+
+            codigo.className =
+                "small text-muted";
+
+
+            codigo.textContent =
+                producto.codigo ?? "";
+
+
+            const idInput =
+                document.createElement(
+                    "input"
+                );
+
+
+            idInput.type =
+                "hidden";
+
+
+            idInput.name =
+                `Detalles[${indice}].IdProducto`;
+
+
+            idInput.value =
+                String(
+                    detalle.idProducto
+                );
+
+
+            celda.appendChild(
+                nombre
+            );
+
+
+            celda.appendChild(
+                codigo
+            );
+
+
+            celda.appendChild(
+                idInput
+            );
+
+
+            return celda;
+        }
+
+
+        // =========================================================
+        // CREAR CELDA CANTIDAD
+        // =========================================================
+
+        function crearCeldaCantidad(
+            detalle,
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const input =
+                document.createElement(
+                    "input"
+                );
+
+
+            input.type =
+                "number";
+
+
+            input.className =
+                "form-control form-control-sm";
+
+
+            input.name =
+                `Detalles[${indice}].Cantidad`;
+
+
+            input.min =
+                "0.001";
+
+
+            input.step =
+                "0.001";
+
+
+            input.value =
+                String(
+                    detalle.cantidad
+                );
+
+
+            input.addEventListener(
+                "change",
+                function() {
+                    cambiarCantidad(
+                        indice,
+                        this.value
+                    );
+                }
+            );
+
+
+            celda.appendChild(
+                input
+            );
+
+
+            return celda;
+        }
+
+
+        // =========================================================
+        // CREAR CELDA PRECIO
+        // =========================================================
+
+        function crearCeldaPrecio(
+            detalle,
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const grupo =
+                document.createElement(
+                    "div"
+                );
+
+
+            grupo.className =
+                "input-group input-group-sm";
+
+
+            const simbolo =
+                document.createElement(
+                    "span"
+                );
+
+
+            simbolo.className =
+                "input-group-text";
+
+
+            simbolo.textContent =
+                "₡";
+
+
+            const input =
+                document.createElement(
+                    "input"
+                );
+
+
+            input.type =
+                "number";
+
+
+            input.className =
+                "form-control";
+
+
+            input.name =
+                `Detalles[${indice}].PrecioUnitario`;
+
+
+            input.min =
+                "0.01";
+
+
+            input.step =
+                "0.01";
+
+
+            input.value =
+                String(
+                    detalle.precioUnitario
+                );
+
+
+            input.addEventListener(
+                "change",
+                function() {
+                    cambiarPrecio(
+                        indice,
+                        this.value
+                    );
+                }
+            );
+
+
+            grupo.appendChild(
+                simbolo
+            );
+
+
+            grupo.appendChild(
+                input
+            );
+
+
+            celda.appendChild(
+                grupo
+            );
+
+
+            return celda;
+        }
+
+
+        // =========================================================
+        // CREAR CELDA SUBTOTAL
+        // =========================================================
+
+        function crearCeldaSubtotal(
+            subtotal) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const texto =
+                document.createElement(
+                    "strong"
+                );
+
+
+            texto.textContent =
+                formatoCRC.format(
+                    subtotal
+                );
+
+
+            celda.appendChild(
+                texto
+            );
+
+
+            return celda;
+        }
+
+
+        // =========================================================
+        // CREAR CELDA ELIMINAR
+        // =========================================================
+
+        function crearCeldaEliminar(
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            celda.className =
+                "text-end";
+
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "btn btn-sm btn-outline-danger";
+
+
+            boton.title =
+                "Eliminar producto";
+
+
+            boton.setAttribute(
+                "aria-label",
+                "Eliminar producto"
+            );
+
+
+            const icono =
+                document.createElement(
+                    "i"
+                );
+
+
+            icono.className =
+                "bi bi-trash";
+
+
+            boton.appendChild(
+                icono
+            );
+
+
+            boton.addEventListener(
+                "click",
+                function() {
+                    eliminarProducto(
+                        indice
+                    );
+                }
+            );
+
+
+            celda.appendChild(
+                boton
+            );
+
+
+            return celda;
+        }
+
+
+        // =========================================================
+        // RENDER
+        // =========================================================
+
+        function renderizar() {
+            // replaceChildren elimina los hijos sin interpretar HTML.
+            tabla.replaceChildren();
+
+
+            sinProductos.style.display =
+                detalles.length === 0
+                    ? "block"
+                    : "none";
+
+
+            detalles.forEach(
+                (
+                    detalle,
+                    indice
+                ) => {
+                    const producto =
+                        obtenerProducto(
+                            detalle.idProducto
+                        );
+
+
+                    if (!producto) {
+                        return;
+                    }
+
+
+                    const subtotal =
+                        Number(
+                            detalle.cantidad
+                        )
+                        *
+                        Number(
+                            detalle.precioUnitario
+                        );
+
+
+                    const fila =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    fila.appendChild(
+                        crearCeldaProducto(
+                            producto,
+                            detalle,
+                            indice
+                        )
+                    );
+
+
+                    fila.appendChild(
+                        crearCeldaCantidad(
+                            detalle,
+                            indice
+                        )
+                    );
+
+
+                    fila.appendChild(
+                        crearCeldaPrecio(
+                            detalle,
+                            indice
+                        )
+                    );
+
+
+                    fila.appendChild(
+                        crearCeldaSubtotal(
+                            subtotal
+                        )
+                    );
+
+
+                    fila.appendChild(
+                        crearCeldaEliminar(
+                            indice
+                        )
+                    );
+
+
+                    tabla.appendChild(
+                        fila
+                    );
+                }
+            );
+
+
+            actualizarTotales();
+        }
+
+
+        // =========================================================
+        // TOTALES
+        // =========================================================
+
+        function actualizarTotales() {
+            const subtotal =
+                detalles.reduce(
+                    (
+                        acumulado,
+                        detalle
+                    ) => {
+                        return acumulado
+                            +
+                            (
+                                Number(
+                                    detalle.cantidad
+                                )
+                                *
+                                Number(
+                                    detalle.precioUnitario
+                                )
+                            );
+                    },
+                    0
+                );
+
+
+            const porcentaje =
+                Number(
+                    porcentajeImpuesto.value
+                );
+
+
+            const porcentajeValido =
+                Number.isFinite(porcentaje)
+                    ? porcentaje
+                    : 0;
+
+
+            const impuesto =
+                subtotal
+                *
+                (
+                    porcentajeValido
+                    /
+                    100
+                );
+
+
+            const total =
+                subtotal
+                +
+                impuesto;
+
+
+            subtotalTexto.textContent =
+                formatoCRC.format(
+                    subtotal
+                );
+
+
+            impuestoTexto.textContent =
+                formatoCRC.format(
+                    impuesto
+                );
+
+
+            totalTexto.textContent =
+                formatoCRC.format(
+                    total
+                );
+        }
+
+
+        porcentajeImpuesto.addEventListener(
+            "input",
+            actualizarTotales
+        );
+
+
+        // =========================================================
+        // VALIDAR DETALLES
+        // =========================================================
+
+        function detallesValidos() {
+            if (detalles.length === 0) {
+                alert(
+                    "Debe agregar al menos un producto."
+                );
+
+                return false;
+            }
+
+
+            for (const detalle of detalles) {
+                if (
+                    Number(
+                        detalle.idProducto
+                    )
+                    <= 0
+                ) {
+                    alert(
+                        "Existe un producto no válido."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    !Number.isFinite(
+                        Number(
+                            detalle.cantidad
+                        )
+                    )
+                    ||
+                    Number(
+                        detalle.cantidad
+                    )
+                    <= 0
+                ) {
+                    alert(
+                        "Todas las cantidades deben ser mayores a cero."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    !Number.isFinite(
+                        Number(
+                            detalle.precioUnitario
+                        )
+                    )
+                    ||
+                    Number(
+                        detalle.precioUnitario
+                    )
+                    <= 0
+                ) {
+                    alert(
+                        "Todos los costos deben ser mayores a cero."
+                    );
+
+                    return false;
+                }
+            }
+
+
+            return true;
+        }
+
+
+        // =========================================================
+        // BLOQUEAR DOBLE ENVÍO
+        // =========================================================
+
+        function bloquearFormulario() {
+            envioEnCurso =
+                true;
+
+
+            btnRegistrarCompra.disabled =
+                true;
+
+
+            agregarProducto.disabled =
+                true;
+
+
+            iconoRegistrarCompra.className =
+                "bi bi-hourglass-split me-1";
+
+
+            textoRegistrarCompra.textContent =
+                "Registrando...";
+        }
+
+
+        // =========================================================
+        // SUBMIT
+        // =========================================================
+
+        formCompra.addEventListener(
+            "submit",
+            function(event) {
+                // =================================================
+                // EVITAR SEGUNDO POST
+                // =================================================
+
+                if (envioEnCurso) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                // =================================================
+                // VALIDACIÓN DEL DETALLE
+                // =================================================
+
+                if (!detallesValidos()) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                // =================================================
+                // VALIDACIÓN HTML
+                // =================================================
+
+                if (!formCompra.checkValidity()) {
+                    event.preventDefault();
+
+                    formCompra.reportValidity();
+
+                    return;
+                }
+
+
+                // =================================================
+                // VALIDACIÓN JQUERY UNOBTRUSIVE
+                // =================================================
+
+                if (
+                    typeof window.jQuery
+                    !==
+                    "undefined"
+                    &&
+                    typeof window.jQuery.fn.valid
+                    ===
+                    "function"
+                    &&
+                    !window.jQuery(
+                        formCompra
+                    ).valid()
+                ) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                // =================================================
+                // TODO ESTÁ CORRECTO
+                //
+                // A partir de aquí se permite un único POST.
+                // =================================================
+
+                bloquearFormulario();
+            }
+        );
+
+
+        // =========================================================
+        // CARGA INICIAL
+        // =========================================================
+
+        renderizar();
+
+    </script>
+}
+}

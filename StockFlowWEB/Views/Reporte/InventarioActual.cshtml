@@ -1,0 +1,222 @@
+﻿@model List<StockFlowWEB.Models.Response.ReporteInventarioResponse>
+
+@{
+    ViewData["Title"] = "Inventario actual";
+
+    var valorTotal =
+        Model.Sum(x => x.ValorInventario);
+
+    var stockBajo =
+        Model.Count(x => x.StockBajo);
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Inventario actual
+        </h1>
+
+        <p>
+            Existencias y valoración actual del inventario.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Reportes
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Mensaje
+    </div>
+}
+
+
+<div class="row g-3 mb-4">
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Productos
+            </span>
+
+            <p class="kpi-value">
+                @Model.Count
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Valor del inventario
+            </span>
+
+            <p class="kpi-value fs-5">
+                ₡@valorTotal.ToString("N2")
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Stock bajo
+            </span>
+
+            <p class="kpi-value">
+                @stockBajo
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="content-card">
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Stock</th>
+                        <th>Mínimo</th>
+                        <th>Costo</th>
+                        <th>Precio venta</th>
+                        <th>Valor inventario</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var producto in Model)
+                    {
+                        <tr>
+
+                            <td>
+
+                                <strong class="d-block">
+                                    @producto.Nombre
+                                </strong>
+
+                                <span class="small text-muted">
+                                    @producto.Codigo
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                @producto.Categoria
+                            </td>
+
+
+                            <td>
+
+                                @if (producto.StockBajo)
+                                {
+                                    <span class="badge-stock">
+
+                                        <i class="bi bi-exclamation-triangle me-1"></i>
+
+                                        @producto.StockActual.ToString("N3")
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <strong>
+                                        @producto.StockActual.ToString("N3")
+                                    </strong>
+                                }
+
+                            </td>
+
+
+                            <td>
+                                @producto.StockMinimo.ToString("N3")
+                            </td>
+
+
+                            <td>
+                                ₡@producto.PrecioCompra.ToString("N2")
+                            </td>
+
+
+                            <td>
+                                ₡@producto.PrecioVenta.ToString("N2")
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    ₡@producto.ValorInventario.ToString("N2")
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+
+            <i class="bi bi-boxes"></i>
+
+            <strong class="d-block">
+                No existen productos
+            </strong>
+
+        </div>
+    }
+
+</div>

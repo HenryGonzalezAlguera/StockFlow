@@ -1,0 +1,188 @@
+﻿@model StockFlowWEB.Models.Response.ProveedorResponse
+
+@{
+    ViewData["Title"] = "Detalle proveedor";
+
+    var rol =
+        Context.Session
+            .GetString("Rol")
+        ??
+        string.Empty;
+
+    var puedeEditar =
+        rol == "Administrador"
+        ||
+        rol == "Empleado";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            @Model.Nombre
+        </h1>
+
+        <p>
+            Información general del proveedor.
+        </p>
+
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+        @if (puedeEditar)
+        {
+            <a asp-action="Modificar"
+               asp-route-id="@Model.IdProveedor"
+               class="btn btn-primary">
+
+                <i class="bi bi-pencil me-1"></i>
+
+                Editar
+
+            </a>
+        }
+
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            Volver
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="content-card">
+
+    <div class="content-card-header">
+
+        <h5>
+            Información del proveedor
+        </h5>
+
+    </div>
+
+
+    <div class="content-card-body">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-6">
+
+                <div class="small text-muted mb-1">
+                    Identificación
+                </div>
+
+                <strong>
+
+                    @(string.IsNullOrWhiteSpace(Model.Identificacion)
+                        ? "No registrada"
+                        : Model.Identificacion)
+
+                </strong>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="small text-muted mb-1">
+                    Estado
+                </div>
+
+
+                @if (Model.Estado)
+                {
+                    <span class="badge rounded-pill text-bg-success">
+                        Activo
+                    </span>
+                }
+                else
+                {
+                    <span class="badge rounded-pill text-bg-secondary">
+                        Inactivo
+                    </span>
+                }
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="small text-muted mb-1">
+                    Correo
+                </div>
+
+                <strong>
+
+                    @(string.IsNullOrWhiteSpace(Model.Correo)
+                        ? "No registrado"
+                        : Model.Correo)
+
+                </strong>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="small text-muted mb-1">
+                    Teléfono
+                </div>
+
+                <strong>
+
+                    @(string.IsNullOrWhiteSpace(Model.Telefono)
+                        ? "No registrado"
+                        : Model.Telefono)
+
+                </strong>
+
+            </div>
+
+
+            <div class="col-12">
+
+                <div class="small text-muted mb-1">
+                    Dirección
+                </div>
+
+                <p class="mb-0">
+
+                    @(string.IsNullOrWhiteSpace(Model.Direccion)
+                        ? "No registrada"
+                        : Model.Direccion)
+
+                </p>
+
+            </div>
+
+
+            <div class="col-md-6">
+
+                <div class="small text-muted mb-1">
+                    Fecha de registro
+                </div>
+
+                <strong>
+
+                    @Model.FechaRegistro.ToString("dd/MM/yyyy")
+
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

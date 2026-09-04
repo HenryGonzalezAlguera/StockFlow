@@ -1,0 +1,605 @@
+﻿@model StockFlowWEB.Models.ViewModels.CategoriaIndexViewModel
+
+@{
+    ViewData["Title"] = "Categorías";
+
+    var rol =
+        Context.Session.GetString("Rol")
+        ?? string.Empty;
+
+    var puedeEditar =
+        rol == "Administrador"
+        ||
+        rol == "Empleado";
+
+    var esAdministrador =
+        rol == "Administrador";
+
+
+    var primerRegistro =
+        Model.TotalRegistros == 0
+        ? 0
+        : ((Model.PaginaActual - 1)
+            * Model.CantidadPagina) + 1;
+
+
+    var ultimoRegistro =
+        Math.Min(
+            Model.PaginaActual
+            * Model.CantidadPagina,
+            Model.TotalRegistros
+        );
+
+
+    var inicioPagina =
+        Math.Max(
+            1,
+            Model.PaginaActual - 2
+        );
+
+
+    var finPagina =
+        Math.Min(
+            Model.TotalPaginas,
+            Model.PaginaActual + 2
+        );
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Categorías
+        </h1>
+
+        <p>
+            Organiza los productos de tu negocio.
+        </p>
+
+    </div>
+
+
+    @if (puedeEditar)
+    {
+        <a asp-action="Registrar"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-lg me-1"></i>
+
+            Nueva categoría
+
+        </a>
+    }
+
+</div>
+
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success">
+
+        <i class="bi bi-check-circle me-2"></i>
+
+        @TempData["MensajeExito"]
+
+    </div>
+}
+
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @TempData["MensajeError"]
+
+    </div>
+}
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div class="content-card">
+
+
+    <!-- FILTROS -->
+
+    <div class="content-card-body border-bottom">
+
+        <form method="get"
+              asp-action="Index">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-xl-6 col-md-6">
+
+                    <label class="form-label">
+                        Buscar
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="bi bi-search"></i>
+
+                        </span>
+
+
+                        <input type="text"
+                               name="busqueda"
+                               value="@Model.Busqueda"
+                               class="form-control"
+                               placeholder="Nombre o descripción..." />
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-3">
+
+                    <label class="form-label">
+                        Estado
+                    </label>
+
+
+                    <select name="estado"
+                            class="form-select">
+
+                        @if (Model.Estado == null)
+                        {
+                            <option value="" selected>
+                                Todos
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="">
+                                Todos
+                            </option>
+                        }
+
+
+                        @if (Model.Estado == true)
+                        {
+                            <option value="true" selected>
+                                Activas
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="true">
+                                Activas
+                            </option>
+                        }
+
+
+                        @if (Model.Estado == false)
+                        {
+                            <option value="false" selected>
+                                Inactivas
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="false">
+                                Inactivas
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-3">
+
+                    <label class="form-label">
+                        Mostrar
+                    </label>
+
+
+                    <select name="cantidadPagina"
+                            class="form-select">
+
+                        @foreach (var cantidad in new[] { 10, 20, 50 })
+                        {
+                            if (Model.CantidadPagina == cantidad)
+                            {
+                                <option value="@cantidad" selected>
+                                    @cantidad
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@cantidad">
+                                    @cantidad
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2">
+
+                    <div class="d-flex gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary flex-grow-1">
+
+                            <i class="bi bi-funnel me-1"></i>
+
+                            Filtrar
+
+                        </button>
+
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-x-lg"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- TABLA -->
+    @if (Model.Categorias.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Categoría
+                        </th>
+
+                        <th>
+                            Descripción
+                        </th>
+
+                        <th>
+                            Estado
+                        </th>
+
+                        <th>
+                            Registro
+                        </th>
+
+                        <th class="text-end">
+                            Acciones
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var categoria in Model.Categorias)
+                    {
+                        <tr>
+
+                            <td>
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <div class="product-table-icon">
+
+                                        <i class="bi bi-tag"></i>
+
+                                    </div>
+
+
+                                    <strong>
+                                        @categoria.Nombre
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                @if (string.IsNullOrWhiteSpace(
+                                    categoria.Descripcion))
+                                {
+                                    <span class="text-muted">
+                                        Sin descripción
+                                    </span>
+                                }
+                                else
+                                {
+                                    @categoria.Descripcion
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @if (categoria.Estado)
+                                {
+                                    <span class="badge rounded-pill text-bg-success">
+
+                                        <i class="bi bi-check-circle me-1"></i>
+
+                                        Activa
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill text-bg-secondary">
+
+                                        Inactiva
+
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @categoria.FechaRegistro.ToString(
+                                    "dd/MM/yyyy"
+                                )
+
+                            </td>
+
+
+                            <td class="text-end">
+
+                                <div class="dropdown">
+
+                                    <button class="btn btn-sm btn-light"
+                                            type="button"
+                                            data-bs-toggle="dropdown">
+
+                                        <i class="bi bi-three-dots"></i>
+
+                                    </button>
+
+
+                                    <ul class="dropdown-menu dropdown-menu-end">
+
+
+                                        @if (puedeEditar)
+                                        {
+                                            <li>
+
+                                                <a class="dropdown-item"
+                                                   asp-action="Modificar"
+                                                   asp-route-id="@categoria.IdCategoria">
+
+                                                    <i class="bi bi-pencil me-2"></i>
+
+                                                    Editar
+
+                                                </a>
+
+                                            </li>
+                                        }
+
+
+                                        @if (esAdministrador)
+                                        {
+                                            <li>
+                                                <hr class="dropdown-divider" />
+                                            </li>
+
+
+                                            <li>
+
+                                                <form asp-action="CambiarEstado"
+                                                      asp-route-id="@categoria.IdCategoria"
+                                                      method="post">
+
+                                                    <button type="submit"
+                                                            class="dropdown-item @(categoria.Estado ? "text-danger" : "text-success")"
+                                                            onclick="return confirm('@(
+                                                            categoria.Estado
+                                                            ? "¿Desea desactivar esta categoría?"
+                                                            : "¿Desea activar esta categoría?"
+                                                                                                                )');">
+
+                                                        @if (categoria.Estado)
+                                                        {
+                                                            <i class="bi bi-pause-circle me-2"></i>
+
+                                                            <span>
+                                                                Desactivar
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="bi bi-check-circle me-2"></i>
+
+                                                            <span>
+                                                                Activar
+                                                            </span>
+                                                        }
+
+                                                    </button>
+
+                                                </form>
+
+                                            </li>
+                                        }
+
+                                    </ul>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+
+            <i class="bi bi-tags"></i>
+
+            <strong class="d-block mb-1">
+                No encontramos categorías
+            </strong>
+
+            <span>
+                No existen registros que coincidan con la búsqueda.
+            </span>
+
+        </div>
+    }
+
+
+    <!-- PAGINACION -->
+    @if (Model.TotalRegistros > 0)
+    {
+        <div class="d-flex
+            flex-column
+            flex-md-row
+            justify-content-between
+            align-items-md-center
+            gap-3
+            px-3
+            py-3
+            border-top">
+
+
+            <div class="small text-muted">
+
+                Mostrando
+
+                <strong>
+                    @primerRegistro
+                </strong>
+
+                -
+
+                <strong>
+                    @ultimoRegistro
+                </strong>
+
+                de
+
+                <strong>
+                    @Model.TotalRegistros
+                </strong>
+
+                categorías
+
+            </div>
+
+
+            @if (Model.TotalPaginas > 1)
+            {
+                <nav>
+
+                    <ul class="pagination pagination-sm mb-0">
+
+
+                        <li class="page-item @(Model.PaginaActual <= 1 ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pagina="@(Model.PaginaActual - 1)"
+                               asp-route-cantidadPagina="@Model.CantidadPagina"
+                               asp-route-busqueda="@Model.Busqueda"
+                               asp-route-estado="@Model.Estado">
+
+                                <i class="bi bi-chevron-left"></i>
+
+                            </a>
+
+                        </li>
+
+
+                        @for (
+                            var pagina = inicioPagina;
+                            pagina <= finPagina;
+                            pagina++)
+                        {
+                            <li class="page-item @(pagina == Model.PaginaActual ? "active" : "")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@pagina"
+                                   asp-route-cantidadPagina="@Model.CantidadPagina"
+                                   asp-route-busqueda="@Model.Busqueda"
+                                   asp-route-estado="@Model.Estado">
+
+                                    @pagina
+
+                                </a>
+
+                            </li>
+                        }
+
+
+                        <li class="page-item @(Model.PaginaActual >= Model.TotalPaginas ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pagina="@(Model.PaginaActual + 1)"
+                               asp-route-cantidadPagina="@Model.CantidadPagina"
+                               asp-route-busqueda="@Model.Busqueda"
+                               asp-route-estado="@Model.Estado">
+
+                                <i class="bi bi-chevron-right"></i>
+
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </nav>
+            }
+
+        </div>
+    }
+
+</div>

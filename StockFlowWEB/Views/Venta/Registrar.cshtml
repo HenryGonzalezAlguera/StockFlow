@@ -1,0 +1,1178 @@
+﻿@using System.Text.Json
+@model StockFlowWEB.Models.ViewModels.VentaFormViewModel
+
+@{
+    ViewData["Title"] = "Nueva venta";
+
+
+    var productosJson =
+        JsonSerializer.Serialize(
+            Model.Productos.Select(
+                x => new
+                {
+                    idProducto =
+                        x.IdProducto,
+
+                    codigo =
+                        x.Codigo,
+
+                    nombre =
+                        x.Nombre,
+
+                    precioVenta =
+                        x.PrecioVenta,
+
+                    stockActual =
+                        x.StockActual
+                }
+            )
+        );
+
+
+    var detallesJson =
+        JsonSerializer.Serialize(
+            Model.Detalles.Select(
+                x => new
+                {
+                    idProducto =
+                        x.IdProducto,
+
+                    cantidad =
+                        x.Cantidad
+                }
+            )
+        );
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Nueva venta
+        </h1>
+
+        <p>
+            Registra una salida de productos del inventario.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div asp-validation-summary="ModelOnly"
+     class="alert alert-danger">
+</div>
+
+
+<form asp-action="Registrar"
+      method="post"
+      id="formVenta">
+
+
+    <!-- =====================================================
+         INFORMACION GENERAL
+    ====================================================== -->
+
+    <div class="content-card mb-4">
+
+        <div class="content-card-header">
+
+            <h5>
+                Información de la venta
+            </h5>
+
+            <p>
+                El cliente es opcional para ventas de mostrador.
+            </p>
+
+        </div>
+
+
+        <div class="content-card-body">
+
+            <div class="row g-4">
+
+
+                <div class="col-md-8">
+
+                    <label asp-for="IdCliente"
+                           class="form-label">
+
+                        Cliente
+
+                    </label>
+
+
+                    <select asp-for="IdCliente"
+                            class="form-select">
+
+                        <option value="">
+                            Cliente Ocasional
+                        </option>
+
+
+                        @foreach (var cliente in Model.Clientes)
+                        {
+                            <option value="@cliente.IdCliente">
+
+                                @cliente.Nombre
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    cliente.Identificacion))
+                                {
+                                    <text>
+                                        - @cliente.Identificacion
+                                    </text>
+                                }
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label asp-for="PorcentajeImpuesto"
+                           class="form-label">
+
+                        Impuesto
+
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <input asp-for="PorcentajeImpuesto"
+                               type="number"
+                               min="0"
+                               max="100"
+                               step="0.01"
+                               class="form-control"
+                               id="porcentajeImpuesto" />
+
+                        <span class="input-group-text">
+                            %
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PRODUCTOS
+    ====================================================== -->
+
+    <div class="content-card mb-4">
+
+        <div class="content-card-header">
+
+            <h5>
+                Productos de la venta
+            </h5>
+
+            <p>
+                El precio se obtiene automáticamente del catálogo.
+            </p>
+
+        </div>
+
+
+        <div class="content-card-body border-bottom">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-xl-7">
+
+                    <label class="form-label">
+                        Producto
+                    </label>
+
+
+                    <select id="productoSelector"
+                            class="form-select">
+
+                        <option value="">
+                            Seleccione un producto
+                        </option>
+
+
+                        @foreach (var producto in Model.Productos)
+                        {
+                            if (producto.StockActual > 0)
+                            {
+                                <option value="@producto.IdProducto">
+
+                                    @producto.Codigo -
+                                    @producto.Nombre -
+                                    Stock: @producto.StockActual
+
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@producto.IdProducto"
+                                        disabled>
+
+                                    @producto.Codigo -
+                                    @producto.Nombre -
+                                    Sin stock
+
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-3 col-md-6">
+
+                    <label class="form-label">
+                        Cantidad
+                    </label>
+
+
+                    <input type="number"
+                           id="cantidadNueva"
+                           class="form-control"
+                           min="0.001"
+                           step="0.001"
+                           value="1" />
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-6">
+
+                    <button type="button"
+                            class="btn btn-primary w-100"
+                            id="agregarProducto">
+
+                        <i class="bi bi-plus-lg me-1"></i>
+
+                        Agregar
+
+                    </button>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- INFORMACION DEL PRODUCTO -->
+
+            <div id="productoInfo"
+                 class="mt-3"
+                 style="display:none;">
+
+                <div class="d-flex gap-4 small">
+
+                    <div>
+
+                        <span class="text-muted">
+                            Precio:
+                        </span>
+
+                        <strong id="precioProducto">
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span class="text-muted">
+                            Disponible:
+                        </span>
+
+                        <strong id="stockProducto">
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- TABLA DETALLE -->
+
+        <div class="table-responsive">
+
+            <table class="table table-modern mb-0">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Producto
+                        </th>
+
+                        <th>
+                            Disponible
+                        </th>
+
+                        <th style="width:170px;">
+                            Cantidad
+                        </th>
+
+                        <th>
+                            Precio
+                        </th>
+
+                        <th>
+                            Subtotal
+                        </th>
+
+                        <th style="width:70px;">
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="detalleVenta">
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <div id="sinProductos"
+             class="empty-state">
+
+            <i class="bi bi-cart-plus"></i>
+
+            <strong class="d-block mb-1">
+                Todavía no has agregado productos
+            </strong>
+
+            <span>
+                Selecciona productos para comenzar la venta.
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         RESUMEN
+    ====================================================== -->
+
+    <div class="row justify-content-end">
+
+        <div class="col-xl-5 col-lg-6">
+
+            <div class="content-card">
+
+                <div class="content-card-header">
+
+                    <h5>
+                        Resumen de la venta
+                    </h5>
+
+                </div>
+
+
+                <div class="content-card-body">
+
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Subtotal
+                        </span>
+
+                        <strong id="subtotalTexto">
+                            ₡0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span class="text-muted">
+                            Impuesto
+                        </span>
+
+                        <strong id="impuestoTexto">
+                            ₡0.00
+                        </strong>
+
+                    </div>
+
+
+                    <hr />
+
+
+                    <div class="d-flex
+                        justify-content-between
+                        align-items-center">
+
+                        <strong>
+                            Total
+                        </strong>
+
+
+                        <strong class="fs-4"
+                                id="totalTexto">
+
+                            ₡0.00
+
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- BOTONES -->
+
+    <div class="d-flex justify-content-end gap-2 mt-4">
+
+        <a asp-action="Index"
+           class="btn btn-light">
+
+            Cancelar
+
+        </a>
+
+
+        <button type="submit"
+                class="btn btn-primary btn-lg">
+
+            <i class="bi bi-check-circle me-1"></i>
+
+            Registrar venta
+
+        </button>
+
+    </div>
+
+
+</form>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+
+        const productos =
+            @Html.Raw(productosJson);
+
+
+        let detalles =
+            @Html.Raw(detallesJson);
+
+
+        const selector =
+            document.getElementById(
+                "productoSelector"
+            );
+
+
+        const cantidadNueva =
+            document.getElementById(
+                "cantidadNueva"
+            );
+
+
+        const tabla =
+            document.getElementById(
+                "detalleVenta"
+            );
+
+
+        const sinProductos =
+            document.getElementById(
+                "sinProductos"
+            );
+
+
+        const porcentajeImpuesto =
+            document.getElementById(
+                "porcentajeImpuesto"
+            );
+
+
+        const productoInfo =
+            document.getElementById(
+                "productoInfo"
+            );
+
+
+        const formatoCRC =
+            new Intl.NumberFormat(
+                "es-CR",
+                {
+                    style:
+                        "currency",
+
+                    currency:
+                        "CRC"
+                }
+            );
+
+
+        // =====================================================
+        // SELECCION PRODUCTO
+        // =====================================================
+
+        selector.addEventListener(
+            "change",
+            function () {
+
+                const idProducto =
+                    Number(
+                        this.value
+                    );
+
+
+                const producto =
+                    productos.find(
+                        x =>
+                            x.idProducto
+                            ===
+                            idProducto
+                    );
+
+
+                if (!producto) {
+
+                    productoInfo.style.display =
+                        "none";
+
+                    return;
+                }
+
+
+                document
+                    .getElementById(
+                        "precioProducto"
+                    )
+                    .textContent =
+                    formatoCRC.format(
+                        producto.precioVenta
+                    );
+
+
+                document
+                    .getElementById(
+                        "stockProducto"
+                    )
+                    .textContent =
+                    producto.stockActual;
+
+
+                productoInfo.style.display =
+                    "block";
+
+            }
+        );
+
+
+        // =====================================================
+        // AGREGAR PRODUCTO
+        // =====================================================
+
+        document
+            .getElementById(
+                "agregarProducto"
+            )
+            .addEventListener(
+                "click",
+                function () {
+
+                    const idProducto =
+                        Number(
+                            selector.value
+                        );
+
+
+                    const cantidad =
+                        Number(
+                            cantidadNueva.value
+                        );
+
+
+                    const producto =
+                        productos.find(
+                            x =>
+                                x.idProducto
+                                ===
+                                idProducto
+                        );
+
+
+                    if (!producto) {
+
+                        alert(
+                            "Seleccione un producto."
+                        );
+
+                        return;
+                    }
+
+
+                    if (cantidad <= 0) {
+
+                        alert(
+                            "La cantidad debe ser mayor a cero."
+                        );
+
+                        return;
+                    }
+
+
+                    if (cantidad >
+                        producto.stockActual)
+                    {
+
+                        alert(
+                            "No existe stock suficiente. "
+                            +
+                            "Disponible: "
+                            +
+                            producto.stockActual
+                        );
+
+                        return;
+                    }
+
+
+                    const existente =
+                        detalles.some(
+                            x =>
+                                Number(
+                                    x.idProducto
+                                )
+                                ===
+                                idProducto
+                        );
+
+
+                    if (existente) {
+
+                        alert(
+                            "Este producto ya fue agregado."
+                        );
+
+                        return;
+                    }
+
+
+                    detalles.push(
+                        {
+                            idProducto:
+                                idProducto,
+
+                            cantidad:
+                                cantidad
+                        }
+                    );
+
+
+                    selector.value =
+                        "";
+
+
+                    cantidadNueva.value =
+                        1;
+
+
+                    productoInfo.style.display =
+                        "none";
+
+
+                    renderizar();
+
+                }
+            );
+
+
+        // =====================================================
+        // ELIMINAR
+        // =====================================================
+
+        function eliminarProducto(
+            indice)
+        {
+            detalles.splice(
+                indice,
+                1
+            );
+
+
+            renderizar();
+        }
+
+
+        // =====================================================
+        // CAMBIAR CANTIDAD
+        // =====================================================
+
+        function cambiarCantidad(
+            indice,
+            valor)
+        {
+            const cantidad =
+                Number(
+                    valor
+                );
+
+
+            const detalle =
+                detalles[indice];
+
+
+            const producto =
+                productos.find(
+                    x =>
+                        x.idProducto
+                        ===
+                        Number(
+                            detalle.idProducto
+                        )
+                );
+
+
+            if (!producto) {
+
+                return;
+            }
+
+
+            if (cantidad <= 0) {
+
+                alert(
+                    "La cantidad debe ser mayor a cero."
+                );
+
+                renderizar();
+
+                return;
+            }
+
+
+            if (cantidad >
+                producto.stockActual)
+            {
+
+                alert(
+                    "Stock insuficiente. Disponible: "
+                    +
+                    producto.stockActual
+                );
+
+
+                renderizar();
+
+                return;
+            }
+
+
+            detalles[indice]
+                .cantidad =
+                cantidad;
+
+
+            renderizar();
+        }
+
+
+        // =====================================================
+        // RENDER
+        // =====================================================
+
+        function renderizar()
+        {
+            tabla.innerHTML =
+                "";
+
+
+            sinProductos.style.display =
+                detalles.length === 0
+                ? "block"
+                : "none";
+
+
+            detalles.forEach(
+                (
+                    detalle,
+                    indice
+                ) =>
+                {
+
+                    const producto =
+                        productos.find(
+                            x =>
+                                x.idProducto
+                                ===
+                                Number(
+                                    detalle.idProducto
+                                )
+                        );
+
+
+                    if (!producto) {
+
+                        return;
+                    }
+
+
+                    const subtotal =
+                        Number(
+                            detalle.cantidad
+                        )
+                        *
+                        Number(
+                            producto.precioVenta
+                        );
+
+
+                    const fila =
+                        document.createElement(
+                            "tr"
+                        );
+
+
+                    fila.innerHTML = `
+
+                        <td>
+
+                            <strong>
+                                ${producto.nombre}
+                            </strong>
+
+                            <div class="small text-muted">
+                                ${producto.codigo}
+                            </div>
+
+                            <input
+                                type="hidden"
+                                name="Detalles[${indice}].IdProducto"
+                                value="${detalle.idProducto}" />
+
+                        </td>
+
+
+                        <td>
+
+                            <span class="badge bg-light text-dark">
+
+                                ${producto.stockActual}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <input
+                                type="number"
+                                class="form-control form-control-sm"
+                                name="Detalles[${indice}].Cantidad"
+                                min="0.001"
+                                max="${producto.stockActual}"
+                                step="0.001"
+                                value="${detalle.cantidad}"
+                                onchange="cambiarCantidad(${indice}, this.value)" />
+
+                        </td>
+
+
+                        <td>
+
+                            ${formatoCRC.format(
+                                producto.precioVenta
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+
+                                ${formatoCRC.format(
+                                    subtotal
+                                )}
+
+                            </strong>
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="eliminarProducto(${indice})">
+
+                                <i class="bi bi-trash"></i>
+
+                            </button>
+
+                        </td>
+
+                    `;
+
+
+                    tabla.appendChild(
+                        fila
+                    );
+
+                }
+            );
+
+
+            actualizarTotales();
+        }
+
+
+        // =====================================================
+        // TOTALES
+        // =====================================================
+
+        function actualizarTotales()
+        {
+            const subtotal =
+                detalles.reduce(
+                    (
+                        acumulado,
+                        detalle
+                    ) =>
+                    {
+
+                        const producto =
+                            productos.find(
+                                x =>
+                                    x.idProducto
+                                    ===
+                                    Number(
+                                        detalle.idProducto
+                                    )
+                            );
+
+
+                        if (!producto) {
+
+                            return acumulado;
+                        }
+
+
+                        return acumulado
+                            +
+                            (
+                                Number(
+                                    detalle.cantidad
+                                )
+                                *
+                                Number(
+                                    producto.precioVenta
+                                )
+                            );
+
+                    },
+                    0
+                );
+
+
+            const porcentaje =
+                Number(
+                    porcentajeImpuesto.value
+                )
+                || 0;
+
+
+            const impuesto =
+                subtotal
+                *
+                (
+                    porcentaje
+                    /
+                    100
+                );
+
+
+            const total =
+                subtotal
+                +
+                impuesto;
+
+
+            document
+                .getElementById(
+                    "subtotalTexto"
+                )
+                .textContent =
+                formatoCRC.format(
+                    subtotal
+                );
+
+
+            document
+                .getElementById(
+                    "impuestoTexto"
+                )
+                .textContent =
+                formatoCRC.format(
+                    impuesto
+                );
+
+
+            document
+                .getElementById(
+                    "totalTexto"
+                )
+                .textContent =
+                formatoCRC.format(
+                    total
+                );
+        }
+
+
+        porcentajeImpuesto
+            .addEventListener(
+                "input",
+                actualizarTotales
+            );
+
+
+        // =====================================================
+        // VALIDACION FINAL
+        // =====================================================
+
+        document
+            .getElementById(
+                "formVenta"
+            )
+            .addEventListener(
+                "submit",
+                function (event) {
+
+                    if (
+                        detalles.length === 0
+                    ) {
+
+                        event.preventDefault();
+
+
+                        alert(
+                            "Debe agregar al menos un producto."
+                        );
+
+
+                        return;
+                    }
+
+
+                    for (
+                        const detalle
+                        of detalles
+                    )
+                    {
+
+                        const producto =
+                            productos.find(
+                                x =>
+                                    x.idProducto
+                                    ===
+                                    Number(
+                                        detalle.idProducto
+                                    )
+                            );
+
+
+                        if (
+                            !producto
+                            ||
+                            detalle.cantidad
+                            >
+                            producto.stockActual
+                        )
+                        {
+
+                            event.preventDefault();
+
+
+                            alert(
+                                "Uno de los productos supera el stock disponible."
+                            );
+
+
+                            return;
+                        }
+
+                    }
+
+                }
+            );
+
+
+        renderizar();
+
+    </script>
+}

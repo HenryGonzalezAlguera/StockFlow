@@ -1,0 +1,270 @@
+﻿@{
+    ViewData["Title"] = "Reportes";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Reportes
+        </h1>
+
+        <p>
+            Analiza ventas, compras, inventario y rendimiento de productos.
+        </p>
+
+    </div>
+
+</div>
+
+
+<div class="row g-4">
+
+
+    <!-- VENTAS -->
+
+    <div class="col-xl-4 col-md-6">
+
+        <a asp-action="Ventas"
+           class="text-decoration-none">
+
+            <div class="content-card h-100 report-card">
+
+                <div class="content-card-body">
+
+                    <div class="kpi-icon success mb-4">
+
+                        <i class="bi bi-graph-up-arrow"></i>
+
+                    </div>
+
+
+                    <h5 class="text-dark">
+                        Reporte de ventas
+                    </h5>
+
+
+                    <p class="text-muted mb-3">
+
+                        Consulta las ventas realizadas dentro
+                        de un rango de fechas.
+
+                    </p>
+
+
+                    <span class="text-primary fw-semibold">
+
+                        Ver reporte
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- COMPRAS -->
+
+    <div class="col-xl-4 col-md-6">
+
+        <a asp-action="Compras"
+           class="text-decoration-none">
+
+            <div class="content-card h-100 report-card">
+
+                <div class="content-card-body">
+
+                    <div class="kpi-icon primary mb-4">
+
+                        <i class="bi bi-bag-check"></i>
+
+                    </div>
+
+
+                    <h5 class="text-dark">
+                        Reporte de compras
+                    </h5>
+
+
+                    <p class="text-muted mb-3">
+
+                        Consulta la inversión realizada
+                        en mercancía y proveedores.
+
+                    </p>
+
+
+                    <span class="text-primary fw-semibold">
+
+                        Ver reporte
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- INVENTARIO -->
+
+    <div class="col-xl-4 col-md-6">
+
+        <a asp-action="InventarioActual"
+           class="text-decoration-none">
+
+            <div class="content-card h-100 report-card">
+
+                <div class="content-card-body">
+
+                    <div class="kpi-icon primary mb-4">
+
+                        <i class="bi bi-boxes"></i>
+
+                    </div>
+
+
+                    <h5 class="text-dark">
+                        Inventario actual
+                    </h5>
+
+
+                    <p class="text-muted mb-3">
+
+                        Visualiza existencias y el valor
+                        económico del inventario.
+
+                    </p>
+
+
+                    <span class="text-primary fw-semibold">
+
+                        Ver reporte
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- STOCK BAJO -->
+
+    <div class="col-xl-4 col-md-6">
+
+        <a asp-action="StockBajo"
+           class="text-decoration-none">
+
+            <div class="content-card h-100 report-card">
+
+                <div class="content-card-body">
+
+                    <div class="kpi-icon warning mb-4">
+
+                        <i class="bi bi-exclamation-triangle"></i>
+
+                    </div>
+
+
+                    <h5 class="text-dark">
+                        Stock bajo
+                    </h5>
+
+
+                    <p class="text-muted mb-3">
+
+                        Detecta productos que requieren
+                        reposición de inventario.
+
+                    </p>
+
+
+                    <span class="text-primary fw-semibold">
+
+                        Ver reporte
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+
+    <!-- MAS VENDIDOS -->
+
+    <div class="col-xl-4 col-md-6">
+
+        <a asp-action="ProductosMasVendidos"
+           class="text-decoration-none">
+
+            <div class="content-card h-100 report-card">
+
+                <div class="content-card-body">
+
+                    <div class="kpi-icon success mb-4">
+
+                        <i class="bi bi-trophy"></i>
+
+                    </div>
+
+
+                    <h5 class="text-dark">
+                        Productos más vendidos
+                    </h5>
+
+
+                    <p class="text-muted mb-3">
+
+                        Identifica productos con mayor volumen
+                        de ventas y ganancia bruta.
+
+                    </p>
+
+
+                    <span class="text-primary fw-semibold">
+
+                        Ver reporte
+
+                        <i class="bi bi-arrow-right ms-1"></i>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </a>
+
+    </div>
+
+
+</div>

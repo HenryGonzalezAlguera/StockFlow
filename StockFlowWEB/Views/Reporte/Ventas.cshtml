@@ -1,0 +1,265 @@
+﻿@model StockFlowWEB.Models.ViewModels.ReporteVentasViewModel
+
+@{
+    ViewData["Title"] = "Reporte de ventas";
+
+    var totalVentas =
+        Model.Ventas.Sum(x => x.Total);
+
+    var totalImpuestos =
+        Model.Ventas.Sum(x => x.Impuesto);
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Reporte de ventas
+        </h1>
+
+        <p>
+            Analiza las ventas realizadas por período.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Reportes
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div class="content-card mb-4">
+
+    <div class="content-card-body">
+
+        <form method="get"
+              asp-action="Ventas">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Desde
+                    </label>
+
+                    <input type="date"
+                           name="fechaDesde"
+                           value="@Model.FechaDesde.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Hasta
+                    </label>
+
+                    <input type="date"
+                           name="fechaHasta"
+                           value="@Model.FechaHasta.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-funnel me-1"></i>
+
+                        Generar reporte
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Ventas realizadas
+            </span>
+
+            <p class="kpi-value">
+                @Model.Ventas.Count
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Total vendido
+            </span>
+
+            <p class="kpi-value fs-5">
+                ₡@totalVentas.ToString("N2")
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Impuestos
+            </span>
+
+            <p class="kpi-value fs-5">
+                ₡@totalImpuestos.ToString("N2")
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="content-card">
+
+    @if (Model.Ventas.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Venta</th>
+                        <th>Fecha</th>
+                        <th>Cliente</th>
+                        <th>Usuario</th>
+                        <th>Subtotal</th>
+                        <th>Impuesto</th>
+                        <th>Total</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var venta in Model.Ventas)
+                    {
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    @venta.NumeroVenta
+                                </strong>
+                            </td>
+
+
+                            <td>
+                                @venta.FechaVenta.ToString(
+                                    "dd/MM/yyyy HH:mm"
+                                )
+                            </td>
+
+
+                            <td>
+                                @venta.Cliente
+                            </td>
+
+
+                            <td>
+                                @venta.Usuario
+                            </td>
+
+
+                            <td>
+                                ₡@venta.Subtotal.ToString("N2")
+                            </td>
+
+
+                            <td>
+                                ₡@venta.Impuesto.ToString("N2")
+                            </td>
+
+
+                            <td>
+                                <strong>
+                                    ₡@venta.Total.ToString("N2")
+                                </strong>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+
+            <i class="bi bi-graph-up"></i>
+
+            <strong class="d-block mb-1">
+                No existen ventas
+            </strong>
+
+            <span>
+                No se encontraron ventas en el período seleccionado.
+            </span>
+
+        </div>
+    }
+
+</div>

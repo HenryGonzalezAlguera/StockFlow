@@ -1,0 +1,232 @@
+﻿@model StockFlowWEB.Models.Response.MiCuentaResponse
+
+@{
+    ViewData["Title"] = "Mi cuenta";
+
+    var inicial =
+        !string.IsNullOrWhiteSpace(Model.Nombre)
+            ? Model.Nombre.Substring(0, 1).ToUpper()
+            : "U";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Mi cuenta
+        </h1>
+
+        <p>
+            Consulta tu información personal y la empresa asociada.
+        </p>
+
+    </div>
+
+
+    <a asp-action="CambiarContrasena"
+       class="btn btn-primary">
+
+        <i class="bi bi-key me-1"></i>
+
+        Cambiar contraseña
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div class="row g-4">
+
+    <!-- =========================================================
+         PERFIL
+    ========================================================== -->
+
+    <div class="col-xl-4">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-body text-center py-5">
+
+                <div class="topbar-avatar mx-auto mb-3"
+                     style="width:72px;height:72px;font-size:1.5rem;">
+
+                    @inicial
+
+                </div>
+
+
+                <h4 class="mb-1">
+                    @Model.Nombre
+                </h4>
+
+
+                <p class="text-muted mb-3">
+                    @Model.Correo
+                </p>
+
+
+                <span class="badge rounded-pill text-bg-primary px-3 py-2">
+
+                    @Model.Rol
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         INFORMACIÓN
+    ========================================================== -->
+
+    <div class="col-xl-8">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h5>
+                    Información de la cuenta
+                </h5>
+
+            </div>
+
+
+            <div class="content-card-body">
+
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted mb-1">
+                            Nombre
+                        </div>
+
+                        <strong>
+                            @Model.Nombre
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted mb-1">
+                            Correo electrónico
+                        </div>
+
+                        <strong>
+                            @Model.Correo
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted mb-1">
+                            Rol
+                        </div>
+
+                        <strong>
+                            @Model.Rol
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted mb-1">
+                            Fecha de registro
+                        </div>
+
+                        <strong>
+                            @Model.FechaRegistro.ToString("dd/MM/yyyy")
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted mb-1">
+                            Empresa
+                        </div>
+
+                        <strong>
+                            @Model.NombreEmpresa
+                        </strong>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <div class="small text-muted mb-1">
+                            Identificación de empresa
+                        </div>
+
+                        <strong>
+                            @Model.IdentificacionEmpresa
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="content-card mt-4">
+
+    <div class="content-card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+        <div>
+
+            <strong class="d-block mb-1">
+                Seguridad de la cuenta
+            </strong>
+
+            <span class="text-muted small">
+                Para cambiar tu contraseña debes confirmar primero la contraseña actual.
+            </span>
+
+        </div>
+
+
+        <a asp-action="CambiarContrasena"
+           class="btn btn-outline-primary">
+
+            <i class="bi bi-shield-lock me-1"></i>
+
+            Actualizar contraseña
+
+        </a>
+
+    </div>
+
+</div>

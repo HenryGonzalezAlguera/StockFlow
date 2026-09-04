@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="StockFlowAPI/StockFlowAPI.csproj" Id="812f3f96-8044-4831-a176-1d6fa531fa34" />
+  <Project Path="StockFlowWEB/StockFlowWEB.csproj" Id="a97cad20-5445-443d-bc0d-b72544b37d09" />
+</Solution>

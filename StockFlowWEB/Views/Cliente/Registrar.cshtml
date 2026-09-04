@@ -1,0 +1,203 @@
+﻿@model StockFlowWEB.Models.ViewModels.ClienteFormViewModel
+
+@{
+    ViewData["Title"] = "Nuevo cliente";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Nuevo cliente
+        </h1>
+
+        <p>
+            Registra una nueva persona o empresa cliente.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div class="content-card">
+
+    <div class="content-card-header">
+
+        <h5>
+            Información del cliente
+        </h5>
+
+        <p>
+            La identificación y los datos de contacto son opcionales.
+        </p>
+
+    </div>
+
+
+    <div class="content-card-body">
+
+        <form asp-action="Registrar"
+              method="post">
+
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+
+            <div class="row g-4">
+
+
+                <div class="col-md-4">
+
+                    <label asp-for="Identificacion"
+                           class="form-label">
+
+                        Identificación
+
+                    </label>
+
+                    <input asp-for="Identificacion"
+                           class="form-control"
+                           placeholder="Ej. 1-1111-1111" />
+
+                </div>
+
+
+                <div class="col-md-8">
+
+                    <label asp-for="Nombre"
+                           class="form-label">
+
+                        Nombre
+
+                    </label>
+
+                    <input asp-for="Nombre"
+                           class="form-control"
+                           placeholder="Nombre completo" />
+
+                    <span asp-validation-for="Nombre"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label asp-for="Correo"
+                           class="form-label">
+
+                        Correo electrónico
+
+                    </label>
+
+                    <input asp-for="Correo"
+                           class="form-control"
+                           placeholder="cliente@email.com" />
+
+                    <span asp-validation-for="Correo"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label asp-for="Telefono"
+                           class="form-label">
+
+                        Teléfono
+
+                    </label>
+
+                    <input asp-for="Telefono"
+                           class="form-control"
+                           placeholder="8888-8888" />
+
+                </div>
+
+
+                <div class="col-12">
+
+                    <label asp-for="Direccion"
+                           class="form-label">
+
+                        Dirección
+
+                    </label>
+
+                    <textarea asp-for="Direccion"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Dirección opcional...">
+                    </textarea>
+
+                </div>
+
+
+            </div>
+
+
+            <hr class="my-4" />
+
+
+            <div class="d-flex justify-content-end gap-2">
+
+                <a asp-action="Index"
+                   class="btn btn-light">
+
+                    Cancelar
+
+                </a>
+
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-check-lg me-1"></i>
+
+                    Guardar cliente
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

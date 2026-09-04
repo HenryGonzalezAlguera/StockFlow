@@ -1,0 +1,537 @@
+﻿@model StockFlowWEB.Models.ViewModels.VentaIndexViewModel
+
+@{
+    ViewData["Title"] = "Ventas";
+
+    var rol =
+        Context.Session.GetString("Rol")
+        ?? string.Empty;
+
+    var puedeRegistrar =
+        rol == "Administrador"
+        ||
+        rol == "Empleado";
+
+
+    var primerRegistro =
+        Model.TotalRegistros == 0
+        ? 0
+        : ((Model.PaginaActual - 1)
+            * Model.CantidadPagina) + 1;
+
+
+    var ultimoRegistro =
+        Math.Min(
+            Model.PaginaActual
+            * Model.CantidadPagina,
+            Model.TotalRegistros
+        );
+
+
+    var inicioPagina =
+        Math.Max(
+            1,
+            Model.PaginaActual - 2
+        );
+
+
+    var finPagina =
+        Math.Min(
+            Model.TotalPaginas,
+            Model.PaginaActual + 2
+        );
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Ventas
+        </h1>
+
+        <p>
+            Registra y consulta las salidas comerciales de tu negocio.
+        </p>
+
+    </div>
+
+
+    @if (puedeRegistrar)
+    {
+        <a asp-action="Registrar"
+           class="btn btn-primary">
+
+            <i class="bi bi-cart-plus me-1"></i>
+
+            Nueva venta
+
+        </a>
+    }
+
+</div>
+
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success">
+
+        <i class="bi bi-check-circle me-2"></i>
+
+        @TempData["MensajeExito"]
+
+    </div>
+}
+
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @TempData["MensajeError"]
+
+    </div>
+}
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Mensaje
+    </div>
+}
+
+
+<div class="content-card">
+
+
+    <div class="content-card-body border-bottom">
+
+        <form method="get"
+              asp-action="Index">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-xl-3 col-md-6">
+
+                    <label class="form-label">
+                        Buscar
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="bi bi-search"></i>
+
+                        </span>
+
+
+                        <input type="text"
+                               name="busqueda"
+                               value="@Model.Busqueda"
+                               class="form-control"
+                               placeholder="Número de venta o cliente..." />
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-xl-3 col-md-6">
+
+                    <label class="form-label">
+                        Cliente
+                    </label>
+
+
+                    <select name="idCliente"
+                            class="form-select">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+
+                        @foreach (var cliente in Model.Clientes)
+                        {
+                            if (Model.IdCliente ==
+                                cliente.IdCliente)
+                            {
+                                <option value="@cliente.IdCliente"
+                                        selected>
+
+                                    @cliente.Nombre
+
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@cliente.IdCliente">
+
+                                    @cliente.Nombre
+
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <label class="form-label">
+                        Desde
+                    </label>
+
+
+                    <input type="date"
+                           name="fechaDesde"
+                           value="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <label class="form-label">
+                        Hasta
+                    </label>
+
+
+                    <input type="date"
+                           name="fechaHasta"
+                           value="@Model.FechaHasta?.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <div class="d-flex gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary flex-grow-1">
+
+                            Filtrar
+
+                        </button>
+
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-x-lg"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <input type="hidden"
+                   name="cantidadPagina"
+                   value="@Model.CantidadPagina" />
+
+        </form>
+
+    </div>
+
+
+
+    @if (Model.Ventas.Any())
+    {
+
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Venta</th>
+
+                        <th>Cliente</th>
+
+                        <th>Vendedor</th>
+
+                        <th>Fecha</th>
+
+                        <th>Total</th>
+
+                        <th>Estado</th>
+
+                        <th class="text-end">
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var venta in Model.Ventas)
+                    {
+
+                        <tr>
+
+                            <td>
+
+                                <div class="d-flex align-items-center gap-3">
+
+                                    <div class="product-table-icon">
+
+                                        <i class="bi bi-receipt-cutoff"></i>
+
+                                    </div>
+
+
+                                    <strong>
+                                        @venta.NumeroVenta
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                @if (venta.IdCliente == null)
+                                {
+                                    <span>
+
+                                        @venta.Cliente
+
+                                    </span>
+
+                                    <div class="small text-muted">
+                                        Venta de mostrador
+                                    </div>
+                                }
+                                else
+                                {
+                                    @venta.Cliente
+                                }
+
+                            </td>
+
+
+                            <td>
+                                @venta.Usuario
+                            </td>
+
+
+                            <td>
+
+                                @venta.FechaVenta.ToString(
+                                    "dd/MM/yyyy HH:mm"
+                                )
+
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    ₡@venta.Total.ToString("N2")
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                @if (venta.Estado)
+                                {
+                                    <span class="badge rounded-pill text-bg-success">
+
+                                        Registrada
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill text-bg-secondary">
+
+                                        Inactiva
+
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td class="text-end">
+
+                                <a asp-action="Detalle"
+                                   asp-route-id="@venta.IdVenta"
+                                   class="btn btn-sm btn-light">
+
+                                    <i class="bi bi-eye me-1"></i>
+
+                                    Ver
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    }
+    else
+    {
+
+        <div class="empty-state">
+
+            <i class="bi bi-cart"></i>
+
+            <strong class="d-block mb-1">
+                No encontramos ventas
+            </strong>
+
+            <span>
+                Ajusta los filtros o registra una nueva venta.
+            </span>
+
+        </div>
+
+    }
+
+
+
+    @if (Model.TotalRegistros > 0)
+    {
+
+        <div class="d-flex
+            flex-column
+            flex-md-row
+            justify-content-between
+            align-items-md-center
+            gap-3
+            px-3 py-3 border-top">
+
+
+            <div class="small text-muted">
+
+                Mostrando
+
+                <strong>@primerRegistro</strong>
+
+                -
+
+                <strong>@ultimoRegistro</strong>
+
+                de
+
+                <strong>@Model.TotalRegistros</strong>
+
+                ventas
+
+            </div>
+
+
+            @if (Model.TotalPaginas > 1)
+            {
+
+                <nav>
+
+                    <ul class="pagination pagination-sm mb-0">
+
+
+                        <li class="page-item @(Model.PaginaActual <= 1 ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pagina="@(Model.PaginaActual - 1)"
+                               asp-route-cantidadPagina="@Model.CantidadPagina"
+                               asp-route-busqueda="@Model.Busqueda"
+                               asp-route-idCliente="@Model.IdCliente"
+                               asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                               asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")">
+
+                                <i class="bi bi-chevron-left"></i>
+
+                            </a>
+
+                        </li>
+
+
+                        @for (
+                            var pagina = inicioPagina;
+                            pagina <= finPagina;
+                            pagina++)
+                        {
+
+                            <li class="page-item @(pagina == Model.PaginaActual ? "active" : "")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@pagina"
+                                   asp-route-cantidadPagina="@Model.CantidadPagina"
+                                   asp-route-busqueda="@Model.Busqueda"
+                                   asp-route-idCliente="@Model.IdCliente"
+                                   asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                                   asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")">
+
+                                    @pagina
+
+                                </a>
+
+                            </li>
+
+                        }
+
+
+                        <li class="page-item @(Model.PaginaActual >= Model.TotalPaginas ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pagina="@(Model.PaginaActual + 1)"
+                               asp-route-cantidadPagina="@Model.CantidadPagina"
+                               asp-route-busqueda="@Model.Busqueda"
+                               asp-route-idCliente="@Model.IdCliente"
+                               asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                               asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")">
+
+                                <i class="bi bi-chevron-right"></i>
+
+                            </a>
+
+                        </li>
+
+
+                    </ul>
+
+                </nav>
+
+            }
+
+        </div>
+
+    }
+
+</div>

@@ -1,0 +1,206 @@
+﻿@model StockFlowWEB.Models.ViewModels.ModificarUsuarioViewModel
+
+@{
+    ViewData["Title"] = "Modificar usuario";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Modificar usuario
+        </h1>
+
+        <p>
+            Actualiza los datos y el rol de la cuenta.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div class="content-card">
+
+    <div class="content-card-header">
+
+        <h5>
+            Información del usuario
+        </h5>
+
+        <p>
+            La contraseña no se modifica desde esta pantalla.
+        </p>
+
+    </div>
+
+
+    <div class="content-card-body">
+
+        <form asp-action="Modificar"
+              method="post">
+
+
+            <input asp-for="IdUsuario"
+                   type="hidden" />
+
+
+            <input asp-for="RolActual"
+                   type="hidden" />
+
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+
+            <div class="row g-4">
+
+
+                <div class="col-md-6">
+
+                    <label asp-for="Nombre"
+                           class="form-label">
+
+                        Nombre
+
+                    </label>
+
+
+                    <input asp-for="Nombre"
+                           class="form-control"
+                           autocomplete="name" />
+
+
+                    <span asp-validation-for="Nombre"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label asp-for="Correo"
+                           class="form-label">
+
+                        Correo electrónico
+
+                    </label>
+
+
+                    <input asp-for="Correo"
+                           type="email"
+                           class="form-control"
+                           autocomplete="email" />
+
+
+                    <span asp-validation-for="Correo"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label asp-for="IdRol"
+                           class="form-label">
+                    </label>
+
+
+                    <select asp-for="IdRol"
+                            class="form-select">
+
+                        @foreach (var rol in Model.Roles)
+                        {
+                            <option value="@rol.IdRol">
+                                @rol.NombreRol
+                            </option>
+                        }
+
+                    </select>
+
+
+                    <span asp-validation-for="IdRol"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Rol actual
+                    </label>
+
+
+                    <input value="@Model.RolActual"
+                           class="form-control"
+                           readonly />
+
+                </div>
+
+            </div>
+
+
+            <hr class="my-4" />
+
+
+            <div class="d-flex justify-content-end gap-2">
+
+                <a asp-action="Index"
+                   class="btn btn-light">
+
+                    Cancelar
+
+                </a>
+
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-check-lg me-1"></i>
+
+                    Guardar cambios
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

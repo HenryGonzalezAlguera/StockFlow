@@ -1,0 +1,666 @@
+﻿@model StockFlowWEB.Models.ViewModels.RegistrarEmpresaViewModel
+
+@{
+    ViewData["Title"] =
+        "Crear empresa";
+
+    Layout =
+        "_LoginLayout";
+}
+
+
+<div class="login-wrapper">
+
+    <div class="login-container"
+         style="max-width: 760px;">
+
+
+        <!-- =====================================================
+             BRAND
+        ====================================================== -->
+
+        <div class="login-brand">
+
+            <div class="brand-icon">
+
+                <i class="bi bi-box-seam"></i>
+
+            </div>
+
+
+            <h1>
+                StockFlow
+            </h1>
+
+
+            <p>
+                Crea tu espacio de trabajo
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             CARD
+        ====================================================== -->
+
+        <div class="login-card">
+
+
+            <div class="mb-4">
+
+                <h2>
+                    Registrar empresa
+                </h2>
+
+
+                <p class="text-muted mb-0">
+
+                    Crea la empresa y su cuenta de administrador.
+
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 ERROR
+            ================================================== -->
+            @if (ViewBag.Mensaje != null)
+            {
+                <div class="alert alert-danger">
+
+                    <i class="bi bi-exclamation-circle me-2"></i>
+
+                    @ViewBag.Mensaje
+
+                </div>
+            }
+
+
+            <form asp-controller="Home"
+                  asp-action="Registrar"
+                  method="post"
+                  id="formRegistrarEmpresa">
+
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
+                </div>
+
+
+                <!-- =================================================
+                     DATOS EMPRESA
+                ================================================== -->
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+
+                    <div class="text-primary fs-5">
+
+                        <i class="bi bi-building"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h5 class="mb-0">
+                            Datos de la empresa
+                        </h5>
+
+                        <small class="text-muted">
+                            Información general del negocio.
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row g-3">
+
+
+                    <!-- =========================================
+                         IDENTIFICACIÓN
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="IdentificacionEmpresa"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-card-text"></i>
+
+                            </span>
+
+
+                            <input asp-for="IdentificacionEmpresa"
+                                   class="form-control"
+                                   autocomplete="organization"
+                                   placeholder="Ej. 3101123456" />
+
+                        </div>
+
+
+                        <span asp-validation-for="IdentificacionEmpresa"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         NOMBRE EMPRESA
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="NombreEmpresa"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-building"></i>
+
+                            </span>
+
+
+                            <input asp-for="NombreEmpresa"
+                                   class="form-control"
+                                   placeholder="Nombre comercial" />
+
+                        </div>
+
+
+                        <span asp-validation-for="NombreEmpresa"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         CORREO EMPRESA
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="CorreoEmpresa"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-envelope"></i>
+
+                            </span>
+
+
+                            <input asp-for="CorreoEmpresa"
+                                   type="email"
+                                   class="form-control"
+                                   placeholder="contacto@empresa.com" />
+
+                        </div>
+
+
+                        <span asp-validation-for="CorreoEmpresa"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         TELÉFONO
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="TelefonoEmpresa"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-telephone"></i>
+
+                            </span>
+
+
+                            <input asp-for="TelefonoEmpresa"
+                                   class="form-control"
+                                   autocomplete="tel"
+                                   placeholder="8888-8888" />
+
+                        </div>
+
+
+                        <span asp-validation-for="TelefonoEmpresa"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         DIRECCIÓN
+                    ========================================== -->
+
+                    <div class="col-12">
+
+                        <label asp-for="DireccionEmpresa"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-geo-alt"></i>
+
+                            </span>
+
+
+                            <textarea asp-for="DireccionEmpresa"
+                                      class="form-control"
+                                      rows="2"
+                                      placeholder="Dirección de la empresa">
+                            </textarea>
+
+                        </div>
+
+
+                        <span asp-validation-for="DireccionEmpresa"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <hr class="my-4" />
+
+
+                <!-- =================================================
+                     ADMINISTRADOR
+                ================================================== -->
+
+                <div class="d-flex align-items-center gap-2 mb-3">
+
+                    <div class="text-primary fs-5">
+
+                        <i class="bi bi-person-gear"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <h5 class="mb-0">
+                            Administrador
+                        </h5>
+
+                        <small class="text-muted">
+
+                            Esta será la primera cuenta de la empresa.
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="row g-3">
+
+
+                    <!-- =========================================
+                         NOMBRE ADMIN
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="NombreAdministrador"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-person"></i>
+
+                            </span>
+
+
+                            <input asp-for="NombreAdministrador"
+                                   class="form-control"
+                                   autocomplete="name"
+                                   placeholder="Nombre completo" />
+
+                        </div>
+
+
+                        <span asp-validation-for="NombreAdministrador"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         CORREO ADMIN
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="CorreoAdministrador"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-envelope-at"></i>
+
+                            </span>
+
+
+                            <input asp-for="CorreoAdministrador"
+                                   type="email"
+                                   class="form-control"
+                                   autocomplete="email"
+                                   placeholder="admin@empresa.com" />
+
+                        </div>
+
+
+                        <span asp-validation-for="CorreoAdministrador"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         CONTRASEÑA
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Contrasena"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-lock"></i>
+
+                            </span>
+
+
+                            <input asp-for="Contrasena"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="new-password"
+                                   placeholder="Mínimo 8 caracteres" />
+
+                        </div>
+
+
+                        <span asp-validation-for="Contrasena"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <!-- =========================================
+                         CONFIRMAR
+                    ========================================== -->
+
+                    <div class="col-md-6">
+
+                        <label asp-for="ConfirmarContrasena"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-group">
+
+                            <span class="input-group-text">
+
+                                <i class="bi bi-lock-fill"></i>
+
+                            </span>
+
+
+                            <input asp-for="ConfirmarContrasena"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="new-password"
+                                   placeholder="Repita la contraseña" />
+
+                        </div>
+
+
+                        <span asp-validation-for="ConfirmarContrasena"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     INFORMACIÓN
+                ================================================== -->
+
+                <div class="alert alert-light border mt-4 mb-4">
+
+                    <div class="d-flex gap-2">
+
+                        <i class="bi bi-info-circle text-primary"></i>
+
+
+                        <small class="text-muted">
+
+                            La cuenta creada tendrá el rol
+                            <strong>Administrador</strong>.
+                            Desde StockFlow podrá administrar posteriormente
+                            los usuarios de su empresa.
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     BOTONES
+                ================================================== -->
+
+                <div class="d-flex flex-column flex-sm-row gap-2">
+
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary flex-fill">
+
+                        <i class="bi bi-arrow-left me-1"></i>
+
+                        Volver al login
+
+                    </a>
+
+
+                    <button type="submit"
+                            class="btn btn-primary flex-fill"
+                            id="btnRegistrarEmpresa">
+
+                        <i class="bi bi-building-check me-1"
+                           id="iconoRegistrarEmpresa">
+                        </i>
+
+
+                        <span id="textoRegistrarEmpresa">
+
+                            Crear empresa
+
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <div class="login-footer">
+
+            StockFlow © @DateTime.Now.Year
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+
+
+    <script>
+
+        const form =
+            document.getElementById(
+                "formRegistrarEmpresa"
+            );
+
+
+        const boton =
+            document.getElementById(
+                "btnRegistrarEmpresa"
+            );
+
+
+        const icono =
+            document.getElementById(
+                "iconoRegistrarEmpresa"
+            );
+
+
+        const texto =
+            document.getElementById(
+                "textoRegistrarEmpresa"
+            );
+
+
+        let envioEnCurso =
+            false;
+
+
+        form.addEventListener(
+            "submit",
+            function(event) {
+                // =================================================
+                // DOBLE ENVÍO
+                // =================================================
+
+                if (envioEnCurso) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                // =================================================
+                // HTML VALIDATION
+                // =================================================
+
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+
+                    form.reportValidity();
+
+                    return;
+                }
+
+
+                // =================================================
+                // JQUERY VALIDATION
+                // =================================================
+
+                if (
+                    typeof window.jQuery
+                    !==
+                    "undefined"
+                    &&
+                    typeof window.jQuery.fn.valid
+                    ===
+                    "function"
+                    &&
+                    !window.jQuery(
+                        form
+                    ).valid()
+                ) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                // =================================================
+                // BLOQUEAR
+                // =================================================
+
+                envioEnCurso =
+                    true;
+
+
+                boton.disabled =
+                    true;
+
+
+                icono.className =
+                    "bi bi-hourglass-split me-1";
+
+
+                texto.textContent =
+                    "Creando empresa...";
+            }
+        );
+
+    </script>
+}

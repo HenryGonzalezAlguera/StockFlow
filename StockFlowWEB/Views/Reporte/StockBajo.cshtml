@@ -1,0 +1,183 @@
+﻿@model List<StockFlowWEB.Models.Response.ReporteStockBajoResponse>
+
+@{
+    ViewData["Title"] = "Stock bajo";
+
+    var totalFaltante =
+        Model.Sum(x => x.CantidadFaltante);
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Stock bajo
+        </h1>
+
+        <p>
+            Productos que requieren reposición.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Reportes
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Mensaje
+    </div>
+}
+
+
+<div class="row g-3 mb-4">
+
+
+    <div class="col-md-6">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Productos por reponer
+            </span>
+
+            <p class="kpi-value">
+                @Model.Count
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Unidades faltantes
+            </span>
+
+            <p class="kpi-value">
+                @totalFaltante.ToString("N3")
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="content-card">
+
+    @if (Model.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th>Stock actual</th>
+                        <th>Stock mínimo</th>
+                        <th>Faltante</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var producto in Model)
+                    {
+                        <tr>
+
+                            <td>
+
+                                <strong class="d-block">
+                                    @producto.Nombre
+                                </strong>
+
+                                <span class="small text-muted">
+                                    @producto.Codigo
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                @producto.Categoria
+                            </td>
+
+
+                            <td>
+
+                                <span class="badge-stock">
+
+                                    @producto.StockActual.ToString("N3")
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                @producto.StockMinimo.ToString("N3")
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    @producto.CantidadFaltante.ToString("N3")
+                                </strong>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+
+            <i class="bi bi-check-circle"></i>
+
+            <strong class="d-block mb-1">
+                Inventario saludable
+            </strong>
+
+            <span>
+                Actualmente no existen productos con stock bajo.
+            </span>
+
+        </div>
+    }
+
+</div>

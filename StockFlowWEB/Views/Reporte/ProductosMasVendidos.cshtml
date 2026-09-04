@@ -1,0 +1,296 @@
+﻿@model StockFlowWEB.Models.ViewModels.ReporteProductosVendidosViewModel
+
+@{
+    ViewData["Title"] = "Productos más vendidos";
+
+    var cantidadVendida =
+        Model.Productos.Sum(
+            x => x.CantidadVendida
+        );
+
+    var totalVendido =
+        Model.Productos.Sum(
+            x => x.TotalVendido
+        );
+
+    var ganancia =
+        Model.Productos.Sum(
+            x => x.GananciaBruta
+        );
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Productos más vendidos
+        </h1>
+
+        <p>
+            Analiza el desempeño comercial de tus productos.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Reportes
+
+    </a>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<div class="content-card mb-4">
+
+    <div class="content-card-body">
+
+        <form method="get"
+              asp-action="ProductosMasVendidos">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Desde
+                    </label>
+
+                    <input type="date"
+                           name="fechaDesde"
+                           value="@Model.FechaDesde.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Hasta
+                    </label>
+
+                    <input type="date"
+                           name="fechaHasta"
+                           value="@Model.FechaHasta.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-funnel me-1"></i>
+
+                        Generar reporte
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Unidades vendidas
+            </span>
+
+            <p class="kpi-value">
+                @cantidadVendida.ToString("N3")
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Total vendido
+            </span>
+
+            <p class="kpi-value fs-5">
+                ₡@totalVendido.ToString("N2")
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <span class="kpi-label">
+                Ganancia bruta
+            </span>
+
+            <p class="kpi-value fs-5">
+                ₡@ganancia.ToString("N2")
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="content-card">
+
+    @if (Model.Productos.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total vendido</th>
+                        <th>Ganancia bruta</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @{
+                        var posicion = 1;
+                    }
+
+
+                    @foreach (var producto in Model.Productos)
+                    {
+                        <tr>
+
+                            <td>
+
+                                @if (posicion == 1)
+                                {
+                                    <span class="badge rounded-pill text-bg-warning">
+
+                                        <i class="bi bi-trophy-fill"></i>
+
+                                        #1
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <strong>
+                                        #@posicion
+                                    </strong>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                <strong class="d-block">
+                                    @producto.Nombre
+                                </strong>
+
+                                <span class="small text-muted">
+                                    @producto.Codigo
+                                </span>
+
+                            </td>
+
+
+                            <td>
+                                @producto.CantidadVendida.ToString("N3")
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    ₡@producto.TotalVendido.ToString("N2")
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+                                    ₡@producto.GananciaBruta.ToString("N2")
+                                </strong>
+
+                            </td>
+
+                        </tr>
+
+                        posicion++;
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+
+            <i class="bi bi-trophy"></i>
+
+            <strong class="d-block mb-1">
+                No existen ventas
+            </strong>
+
+            <span>
+                No hay productos vendidos en el período seleccionado.
+            </span>
+
+        </div>
+    }
+
+</div>

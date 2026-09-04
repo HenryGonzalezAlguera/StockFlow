@@ -1,0 +1,652 @@
+﻿@model StockFlowWEB.Models.ViewModels.InventarioIndexViewModel
+
+@{
+    ViewData["Title"] = "Movimientos de inventario";
+
+    var rol =
+        Context.Session.GetString("Rol")
+        ?? string.Empty;
+
+
+    var esAdministrador =
+        rol == "Administrador";
+
+
+    var primerRegistro =
+        Model.TotalRegistros == 0
+        ? 0
+        : ((Model.PaginaActual - 1)
+            * Model.CantidadPagina) + 1;
+
+
+    var ultimoRegistro =
+        Math.Min(
+            Model.PaginaActual
+            * Model.CantidadPagina,
+            Model.TotalRegistros
+        );
+
+
+    var inicioPagina =
+        Math.Max(
+            1,
+            Model.PaginaActual - 2
+        );
+
+
+    var finPagina =
+        Math.Min(
+            Model.TotalPaginas,
+            Model.PaginaActual + 2
+        );
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Movimientos de inventario
+        </h1>
+
+        <p>
+            Consulta cada entrada, salida y ajuste realizado.
+        </p>
+
+    </div>
+
+
+    @if (esAdministrador)
+    {
+        <a asp-action="Ajustar"
+           class="btn btn-primary">
+
+            <i class="bi bi-sliders me-1"></i>
+
+            Ajustar inventario
+
+        </a>
+    }
+
+</div>
+
+
+@if (TempData["MensajeExito"] != null)
+{
+    <div class="alert alert-success">
+
+        <i class="bi bi-check-circle me-2"></i>
+
+        @TempData["MensajeExito"]
+
+    </div>
+}
+
+
+@if (TempData["MensajeError"] != null)
+{
+    <div class="alert alert-danger">
+
+        <i class="bi bi-exclamation-circle me-2"></i>
+
+        @TempData["MensajeError"]
+
+    </div>
+}
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+        @ViewBag.Mensaje
+    </div>
+}
+
+
+<div class="content-card">
+
+
+    <!-- FILTROS -->
+
+    <div class="content-card-body border-bottom">
+
+        <form method="get"
+              asp-action="Index">
+
+            <div class="row g-3 align-items-end">
+
+
+                <div class="col-xl-3 col-md-6">
+
+                    <label class="form-label">
+                        Buscar
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+
+                        <input type="text"
+                               name="busqueda"
+                               value="@Model.Busqueda"
+                               class="form-control"
+                               placeholder="Producto, compra, venta..." />
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-6">
+
+                    <label class="form-label">
+                        Producto
+                    </label>
+
+
+                    <select name="idProducto"
+                            class="form-select">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+
+                        @foreach (var producto in Model.Productos)
+                        {
+                            if (Model.IdProducto ==
+                                producto.IdProducto)
+                            {
+                                <option value="@producto.IdProducto"
+                                        selected>
+
+                                    @producto.Nombre
+
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@producto.IdProducto">
+
+                                    @producto.Nombre
+
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-6">
+
+                    <label class="form-label">
+                        Movimiento
+                    </label>
+
+
+                    <select name="idTipoMovimiento"
+                            class="form-select">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+
+                        @foreach (var tipo in Model.TiposMovimiento)
+                        {
+                            if (Model.IdTipoMovimiento ==
+                                tipo.IdTipoMovimiento)
+                            {
+                                <option value="@tipo.IdTipoMovimiento"
+                                        selected>
+
+                                    @tipo.Nombre
+
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@tipo.IdTipoMovimiento">
+
+                                    @tipo.Nombre
+
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <label class="form-label">
+                        Desde
+                    </label>
+
+                    <input type="date"
+                           name="fechaDesde"
+                           value="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-xl-2 col-md-4">
+
+                    <label class="form-label">
+                        Hasta
+                    </label>
+
+                    <input type="date"
+                           name="fechaHasta"
+                           value="@Model.FechaHasta?.ToString("yyyy-MM-dd")"
+                           class="form-control" />
+
+                </div>
+
+
+                <div class="col-xl-1 col-md-4">
+
+                    <div class="d-flex gap-2">
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            <i class="bi bi-funnel"></i>
+
+                        </button>
+
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-x-lg"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <input type="hidden"
+                   name="cantidadPagina"
+                   value="@Model.CantidadPagina" />
+
+        </form>
+
+    </div>
+
+
+
+    <!-- TABLA -->
+    @if (Model.Movimientos.Any())
+    {
+
+        <div class="table-responsive">
+
+            <table class="table table-modern align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Producto</th>
+
+                        <th>Movimiento</th>
+
+                        <th>Cantidad</th>
+
+                        <th>Stock</th>
+
+                        <th>Referencia</th>
+
+                        <th>Usuario</th>
+
+                        <th>Fecha</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var movimiento in Model.Movimientos)
+                    {
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="d-block">
+
+                                    @movimiento.Producto
+
+                                </strong>
+
+
+                                <span class="small text-muted">
+
+                                    @movimiento.CodigoProducto
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                @if (
+                                    movimiento.Naturaleza ==
+                                    "ENTRADA")
+                                {
+                                    <span class="badge rounded-pill text-bg-success">
+
+                                        <i class="bi bi-arrow-down-left me-1"></i>
+
+                                        @movimiento.TipoMovimiento
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill text-bg-danger">
+
+                                        <i class="bi bi-arrow-up-right me-1"></i>
+
+                                        @movimiento.TipoMovimiento
+
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                <strong>
+
+                                    @(movimiento.Naturaleza == "ENTRADA"
+                                        ? "+"
+                                        : "-")
+
+                                    @movimiento.Cantidad.ToString("N3")
+
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="inventory-stock-change">
+
+                                    <span>
+                                        @movimiento.StockAnterior.ToString("N3")
+                                    </span>
+
+                                    <i class="bi bi-arrow-right"></i>
+
+                                    <strong>
+                                        @movimiento.StockNuevo.ToString("N3")
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                @if (!string.IsNullOrWhiteSpace(
+                                    movimiento.NumeroCompra))
+                                {
+                                    <span class="badge bg-light text-dark">
+
+                                        @movimiento.NumeroCompra
+
+                                    </span>
+                                }
+                                else if (!string.IsNullOrWhiteSpace(
+                                    movimiento.NumeroVenta))
+                                {
+                                    <span class="badge bg-light text-dark">
+
+                                        @movimiento.NumeroVenta
+
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+
+                                        @(string.IsNullOrWhiteSpace(
+                                            movimiento.Motivo)
+                                            ? "Ajuste manual"
+                                            : movimiento.Motivo)
+
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @movimiento.Usuario
+
+                            </td>
+
+
+                            <td>
+
+                                @movimiento.FechaMovimiento.ToString(
+                                    "dd/MM/yyyy HH:mm"
+                                )
+
+                            </td>
+
+                        </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    }
+    else
+    {
+
+        <div class="empty-state">
+
+            <i class="bi bi-arrow-left-right"></i>
+
+            <strong class="d-block mb-1">
+                No encontramos movimientos
+            </strong>
+
+            <span>
+                Ajusta los filtros de búsqueda.
+            </span>
+
+        </div>
+
+    }
+
+
+
+    <!-- PAGINACION -->
+    @if (Model.TotalRegistros > 0)
+    {
+
+        <div class="d-flex flex-column flex-md-row
+            justify-content-between
+            align-items-md-center
+            gap-3 px-3 py-3 border-top">
+
+
+            <div class="small text-muted">
+
+                Mostrando
+                <strong>@primerRegistro</strong>
+                -
+                <strong>@ultimoRegistro</strong>
+                de
+                <strong>@Model.TotalRegistros</strong>
+                movimientos
+
+            </div>
+
+
+            <div class="d-flex align-items-center gap-3">
+
+
+                <form method="get"
+                      asp-action="Index">
+
+                    <input type="hidden"
+                           name="busqueda"
+                           value="@Model.Busqueda" />
+
+                    <input type="hidden"
+                           name="idProducto"
+                           value="@Model.IdProducto" />
+
+                    <input type="hidden"
+                           name="idTipoMovimiento"
+                           value="@Model.IdTipoMovimiento" />
+
+                    <input type="hidden"
+                           name="fechaDesde"
+                           value="@Model.FechaDesde?.ToString("yyyy-MM-dd")" />
+
+                    <input type="hidden"
+                           name="fechaHasta"
+                           value="@Model.FechaHasta?.ToString("yyyy-MM-dd")" />
+
+
+                    <select name="cantidadPagina"
+                            class="form-select form-select-sm"
+                            onchange="this.form.submit()">
+
+                        @foreach (var cantidad in new[] { 10, 20, 50 })
+                        {
+                            if (Model.CantidadPagina == cantidad)
+                            {
+                                <option value="@cantidad" selected>
+                                    @cantidad por página
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@cantidad">
+                                    @cantidad por página
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </form>
+
+
+                @if (Model.TotalPaginas > 1)
+                {
+
+                    <nav>
+
+                        <ul class="pagination pagination-sm mb-0">
+
+
+                            <li class="page-item @(Model.PaginaActual <= 1 ? "disabled" : "")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@(Model.PaginaActual - 1)"
+                                   asp-route-cantidadPagina="@Model.CantidadPagina"
+                                   asp-route-busqueda="@Model.Busqueda"
+                                   asp-route-idProducto="@Model.IdProducto"
+                                   asp-route-idTipoMovimiento="@Model.IdTipoMovimiento"
+                                   asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                                   asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")">
+
+                                    <i class="bi bi-chevron-left"></i>
+
+                                </a>
+
+                            </li>
+
+
+                            @for (
+                                var pagina = inicioPagina;
+                                pagina <= finPagina;
+                                pagina++)
+                            {
+
+                                <li class="page-item @(pagina == Model.PaginaActual ? "active" : "")">
+
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-route-pagina="@pagina"
+                                       asp-route-cantidadPagina="@Model.CantidadPagina"
+                                       asp-route-busqueda="@Model.Busqueda"
+                                       asp-route-idProducto="@Model.IdProducto"
+                                       asp-route-idTipoMovimiento="@Model.IdTipoMovimiento"
+                                       asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                                       asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")">
+
+                                        @pagina
+
+                                    </a>
+
+                                </li>
+
+                            }
+
+
+                            <li class="page-item @(Model.PaginaActual >= Model.TotalPaginas ? "disabled" : "")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@(Model.PaginaActual + 1)"
+                                   asp-route-cantidadPagina="@Model.CantidadPagina"
+                                   asp-route-busqueda="@Model.Busqueda"
+                                   asp-route-idProducto="@Model.IdProducto"
+                                   asp-route-idTipoMovimiento="@Model.IdTipoMovimiento"
+                                   asp-route-fechaDesde="@Model.FechaDesde?.ToString("yyyy-MM-dd")"
+                                   asp-route-fechaHasta="@Model.FechaHasta?.ToString("yyyy-MM-dd")">
+
+                                    <i class="bi bi-chevron-right"></i>
+
+                                </a>
+
+                            </li>
+
+                        </ul>
+
+                    </nav>
+
+                }
+
+            </div>
+
+        </div>
+
+    }
+
+</div>

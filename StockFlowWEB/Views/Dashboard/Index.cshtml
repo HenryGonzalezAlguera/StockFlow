@@ -1,0 +1,663 @@
+﻿@model StockFlowWEB.Models.Response.DashboardResponse
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            Dashboard
+        </h1>
+
+        <p>
+            Resumen general de la operación de tu negocio.
+        </p>
+
+    </div>
+
+</div>
+
+
+@if (ViewBag.Mensaje != null)
+{
+    <div class="alert alert-warning">
+
+        <i class="bi bi-exclamation-triangle me-2"></i>
+
+        @ViewBag.Mensaje
+
+    </div>
+}
+
+
+<!-- =========================================================
+     KPI ROW 1
+========================================================= -->
+
+<div class="row g-3 mb-3">
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Ventas del mes
+                </span>
+
+                <div class="kpi-icon primary">
+
+                    <i class="bi bi-cart-check"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value">
+
+                ₡@Model.Resumen.VentasMes.ToString("N2")
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Compras del mes
+                </span>
+
+                <div class="kpi-icon warning">
+
+                    <i class="bi bi-bag-plus"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value">
+
+                ₡@Model.Resumen.ComprasMes.ToString("N2")
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Ganancia bruta
+                </span>
+
+                <div class="kpi-icon success">
+
+                    <i class="bi bi-graph-up-arrow"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value">
+
+                ₡@Model.Resumen.GananciaBrutaMes.ToString("N2")
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Stock bajo
+                </span>
+
+                <div class="kpi-icon danger">
+
+                    <i class="bi bi-exclamation-triangle"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value">
+
+                @Model.Resumen.ProductosStockBajo
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     KPI ROW 2
+========================================================= -->
+
+<div class="row g-3 mb-4">
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Productos activos
+                </span>
+
+                <div class="kpi-icon primary">
+
+                    <i class="bi bi-box"></i>
+
+                </div>
+
+            </div>
+
+            <p class="kpi-value">
+
+                @Model.Resumen.ProductosActivos
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Clientes activos
+                </span>
+
+                <div class="kpi-icon success">
+
+                    <i class="bi bi-people"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value">
+
+                @Model.Resumen.ClientesActivos
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Proveedores activos
+                </span>
+
+                <div class="kpi-icon warning">
+
+                    <i class="bi bi-truck"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value">
+
+                @Model.Resumen.ProveedoresActivos
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     CHART
+========================================================= -->
+
+<div class="row g-3 mb-4">
+
+    <div class="col-12">
+
+        <div class="content-card">
+
+            <div class="content-card-header">
+
+                <h5>
+                    Ventas últimos 6 meses
+                </h5>
+
+                <p>
+                    Evolución mensual de los ingresos por ventas.
+                </p>
+
+            </div>
+
+
+            <div class="content-card-body">
+
+                <div style="height: 300px;">
+
+                    <canvas id="ventasChart">
+                    </canvas>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TABLES
+========================================================= -->
+
+<div class="row g-3">
+
+
+    <!-- STOCK BAJO -->
+
+    <div class="col-xl-6">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h5>
+                    Productos con stock bajo
+                </h5>
+
+                <p>
+                    Productos que necesitan atención.
+                </p>
+
+            </div>
+
+
+            @if (Model.ProductosStockBajo.Any())
+            {
+
+                <div class="table-responsive">
+
+                    <table class="table table-modern">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Producto
+                                </th>
+
+                                <th>
+                                    Stock
+                                </th>
+
+                                <th>
+                                    Mínimo
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (
+                                var producto
+                                in Model.ProductosStockBajo)
+                            {
+
+                                <tr>
+
+                                    <td>
+
+                                        <strong>
+                                            @producto.Nombre
+                                        </strong>
+
+                                        <div class="small text-muted">
+                                            @producto.Codigo
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="badge-stock">
+
+                                            @producto.StockActual
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @producto.StockMinimo
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            }
+            else
+            {
+
+                <div class="empty-state">
+
+                    <i class="bi bi-check-circle"></i>
+
+                    No hay productos con stock bajo.
+
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+
+
+
+    <!-- MAS VENDIDOS -->
+
+    <div class="col-xl-6">
+
+        <div class="content-card h-100">
+
+            <div class="content-card-header">
+
+                <h5>
+                    Productos más vendidos
+                </h5>
+
+                <p>
+                    Productos con mayor movimiento este mes.
+                </p>
+
+            </div>
+
+
+            @if (Model.ProductosMasVendidos.Any())
+            {
+
+                <div class="table-responsive">
+
+                    <table class="table table-modern">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Producto
+                                </th>
+
+                                <th>
+                                    Cantidad
+                                </th>
+
+                                <th>
+                                    Ventas
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (
+                                var producto
+                                in Model.ProductosMasVendidos)
+                            {
+
+                                <tr>
+
+                                    <td>
+
+                                        <strong>
+                                            @producto.Nombre
+                                        </strong>
+
+                                        <div class="small text-muted">
+                                            @producto.Codigo
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @producto.CantidadVendida
+
+                                    </td>
+
+
+                                    <td>
+
+                                        ₡@producto.TotalVendido.ToString("N2")
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            }
+            else
+            {
+
+                <div class="empty-state">
+
+                    <i class="bi bi-bar-chart"></i>
+
+                    Todavía no existen ventas para mostrar.
+
+                </div>
+
+            }
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <script>
+
+        const etiquetas = [
+
+                    @foreach (
+    var venta
+    in Model.VentasUltimosMeses)
+            {
+                <text>
+                        '@venta.FechaMes.ToString("MMM yyyy")',
+                </text>
+                    }
+
+                ];
+
+
+        const valores = [
+
+                    @foreach (
+    var venta
+    in Model.VentasUltimosMeses)
+            {
+                <text>
+                                    @venta.TotalVentas.ToString(
+            System.Globalization.CultureInfo.InvariantCulture
+            ),
+                </text>
+                    }
+
+                ];
+
+
+        const canvas =
+            document.getElementById(
+                'ventasChart'
+            );
+
+
+        if (canvas) {
+
+            new Chart(
+                canvas,
+                {
+                    type: 'line',
+
+                    data: {
+
+                        labels:
+                            etiquetas,
+
+                        datasets: [
+                            {
+                                label:
+                                    'Ventas',
+
+                                data:
+                                    valores,
+
+                                borderWidth:
+                                    2,
+
+                                tension:
+                                    0.35,
+
+                                fill:
+                                    true
+                            }
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+                        plugins: {
+
+                            legend: {
+                                display:
+                                    false
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+                                beginAtZero:
+                                    true
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+}

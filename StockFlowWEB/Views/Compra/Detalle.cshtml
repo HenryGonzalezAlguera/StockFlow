@@ -1,0 +1,292 @@
+﻿@model StockFlowWEB.Models.Response.CompraCompletaResponse
+
+@{
+    ViewData["Title"] = "Detalle compra";
+}
+
+
+<div class="page-header">
+
+    <div>
+
+        <h1>
+            @Model.Compra.NumeroCompra
+        </h1>
+
+        <p>
+            Detalle completo de la compra.
+        </p>
+
+    </div>
+
+
+    <a asp-action="Index"
+       class="btn btn-outline-secondary">
+
+        <i class="bi bi-arrow-left me-1"></i>
+
+        Volver
+
+    </a>
+
+</div>
+
+
+<div class="row g-3 mb-4">
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Subtotal
+                </span>
+
+                <div class="kpi-icon primary">
+
+                    <i class="bi bi-receipt"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value fs-5">
+
+                ₡@Model.Compra.Subtotal.ToString("N2")
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Impuesto
+                </span>
+
+                <div class="kpi-icon warning">
+
+                    <i class="bi bi-percent"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value fs-5">
+
+                ₡@Model.Compra.Impuesto.ToString("N2")
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <span class="kpi-label">
+                    Total
+                </span>
+
+                <div class="kpi-icon success">
+
+                    <i class="bi bi-cash-stack"></i>
+
+                </div>
+
+            </div>
+
+
+            <p class="kpi-value fs-5">
+
+                ₡@Model.Compra.Total.ToString("N2")
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<div class="content-card mb-4">
+
+    <div class="content-card-header">
+
+        <h5>
+            Información general
+        </h5>
+
+    </div>
+
+
+    <div class="content-card-body">
+
+        <div class="row g-4">
+
+
+            <div class="col-md-4">
+
+                <div class="small text-muted">
+                    Proveedor
+                </div>
+
+                <strong>
+                    @Model.Compra.Proveedor
+                </strong>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="small text-muted">
+                    Registrado por
+                </div>
+
+                <strong>
+                    @Model.Compra.Usuario
+                </strong>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="small text-muted">
+                    Fecha
+                </div>
+
+                <strong>
+
+                    @Model.Compra.FechaCompra.ToString(
+                        "dd/MM/yyyy HH:mm"
+                    )
+
+                </strong>
+
+            </div>
+
+
+            <div class="col-md-4">
+
+                <div class="small text-muted">
+                    Impuesto aplicado
+                </div>
+
+                <strong>
+                    @Model.Compra.PorcentajeImpuesto.ToString("N2")%
+                </strong>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="content-card">
+
+    <div class="content-card-header">
+
+        <h5>
+            Productos comprados
+        </h5>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        <table class="table table-modern">
+
+            <thead>
+
+                <tr>
+
+                    <th>Producto</th>
+
+                    <th>Cantidad</th>
+
+                    <th>Costo unitario</th>
+
+                    <th>Subtotal</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                @foreach (var detalle in Model.Detalles)
+                {
+
+                    <tr>
+
+                        <td>
+
+                            <strong>
+                                @detalle.Producto
+                            </strong>
+
+                            <div class="small text-muted">
+                                @detalle.CodigoProducto
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            @detalle.Cantidad.ToString("N3")
+                        </td>
+
+
+                        <td>
+
+                            ₡@detalle.PrecioUnitario.ToString("N2")
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                ₡@detalle.Subtotal.ToString("N2")
+                            </strong>
+
+                        </td>
+
+                    </tr>
+
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
