@@ -1,7 +1,8 @@
 ﻿@model StockFlowWEB.Models.ViewModels.ProductoFormViewModel
 
 @{
-    ViewData["Title"] = "Nuevo producto";
+    ViewData["Title"] =
+        "Nuevo producto";
 }
 
 
@@ -72,28 +73,49 @@
             <div class="row g-4">
 
 
+                <!-- =========================================
+                     CÓDIGO AUTOMÁTICO
+                     ========================================= -->
+
                 <div class="col-md-4">
 
-                    <label asp-for="Codigo"
-                           class="form-label">
+                    <label class="form-label">
 
                         Código
 
                     </label>
 
 
-                    <input asp-for="Codigo"
-                           class="form-control"
-                           placeholder="Ej. TEC002" />
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+
+                            <i class="bi bi-upc-scan"></i>
+
+                        </span>
 
 
-                    <span asp-validation-for="Codigo"
-                          class="text-danger small">
-                    </span>
+                        <input type="text"
+                               class="form-control"
+                               value="Se genera automáticamente"
+                               readonly />
+
+                    </div>
+
+
+                    <div class="form-text">
+
+                        StockFlow asignará el siguiente
+                        código disponible al guardar.
+
+                    </div>
 
                 </div>
 
 
+                <!-- =========================================
+                     NOMBRE
+                     ========================================= -->
 
                 <div class="col-md-8">
 
@@ -117,6 +139,9 @@
                 </div>
 
 
+                <!-- =========================================
+                     CATEGORÍA
+                     ========================================= -->
 
                 <div class="col-md-6">
 
@@ -157,6 +182,9 @@
                 </div>
 
 
+                <!-- =========================================
+                     STOCK MÍNIMO
+                     ========================================= -->
 
                 <div class="col-md-6">
 
@@ -169,10 +197,16 @@
 
 
                     <input asp-for="StockMinimo"
+                           asp-format="{0:0}"
                            type="number"
-                           step="0.001"
+                           step="1"
                            min="0"
                            class="form-control" />
+
+
+                    <span asp-validation-for="StockMinimo"
+                          class="text-danger small">
+                    </span>
 
 
                     <div class="form-text">
@@ -185,6 +219,9 @@
                 </div>
 
 
+                <!-- =========================================
+                     PRECIO COMPRA
+                     ========================================= -->
 
                 <div class="col-md-6">
 
@@ -202,6 +239,7 @@
                             ₡
                         </span>
 
+
                         <input asp-for="PrecioCompra"
                                type="number"
                                step="0.01"
@@ -218,6 +256,9 @@
                 </div>
 
 
+                <!-- =========================================
+                     PRECIO VENTA
+                     ========================================= -->
 
                 <div class="col-md-6">
 
@@ -235,6 +276,7 @@
                             ₡
                         </span>
 
+
                         <input asp-for="PrecioVenta"
                                type="number"
                                step="0.01"
@@ -251,6 +293,9 @@
                 </div>
 
 
+                <!-- =========================================
+                     DESCRIPCIÓN
+                     ========================================= -->
 
                 <div class="col-12">
 

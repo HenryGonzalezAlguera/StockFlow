@@ -1,17 +1,21 @@
 ﻿@model StockFlowWEB.Models.ViewModels.ReporteProductosVendidosViewModel
 
 @{
-    ViewData["Title"] = "Productos más vendidos";
+    ViewData["Title"] =
+        "Productos más vendidos";
+
 
     var cantidadVendida =
         Model.Productos.Sum(
             x => x.CantidadVendida
         );
 
+
     var totalVendido =
         Model.Productos.Sum(
             x => x.TotalVendido
         );
+
 
     var ganancia =
         Model.Productos.Sum(
@@ -35,16 +39,45 @@
     </div>
 
 
-    <a asp-action="Index"
-       class="btn btn-outline-secondary">
+    <div class="d-flex gap-2 flex-wrap">
 
-        <i class="bi bi-arrow-left me-1"></i>
+        <a asp-controller="ReportePdf"
+           asp-action="ExportarProductosMasVendidos"
+           asp-route-fechaDesde="@Model.FechaDesde.ToString("yyyy-MM-dd")"
+           asp-route-fechaHasta="@Model.FechaHasta.ToString("yyyy-MM-dd")"
+           class="btn btn-outline-danger">
 
-        Reportes
+            <i class="bi bi-file-earmark-pdf me-1"></i>
 
-    </a>
+            Exportar PDF
+
+        </a>
+
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Reportes
+
+        </a>
+
+    </div>
 
 </div>
+
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-warning">
+
+        <i class="bi bi-exclamation-triangle me-2"></i>
+
+        @TempData["Mensaje"]
+
+    </div>
+}
 
 
 @if (ViewBag.Mensaje != null)
@@ -73,6 +106,7 @@
                         Desde
                     </label>
 
+
                     <input type="date"
                            name="fechaDesde"
                            value="@Model.FechaDesde.ToString("yyyy-MM-dd")"
@@ -86,6 +120,7 @@
                     <label class="form-label">
                         Hasta
                     </label>
+
 
                     <input type="date"
                            name="fechaHasta"
@@ -128,8 +163,11 @@
                 Unidades vendidas
             </span>
 
+
             <p class="kpi-value">
-                @cantidadVendida.ToString("N3")
+
+                @cantidadVendida.ToString("0.###")
+
             </p>
 
         </div>
@@ -145,8 +183,11 @@
                 Total vendido
             </span>
 
+
             <p class="kpi-value fs-5">
+
                 ₡@totalVendido.ToString("N2")
+
             </p>
 
         </div>
@@ -162,8 +203,11 @@
                 Ganancia bruta
             </span>
 
+
             <p class="kpi-value fs-5">
+
                 ₡@ganancia.ToString("N2")
+
             </p>
 
         </div>
@@ -187,10 +231,22 @@
                     <tr>
 
                         <th>#</th>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Total vendido</th>
-                        <th>Ganancia bruta</th>
+
+                        <th>
+                            Producto
+                        </th>
+
+                        <th>
+                            Cantidad
+                        </th>
+
+                        <th>
+                            Total vendido
+                        </th>
+
+                        <th>
+                            Ganancia bruta
+                        </th>
 
                     </tr>
 
@@ -244,14 +300,14 @@
 
 
                             <td>
-                                @producto.CantidadVendida.ToString("N3")
+                                @(producto.CantidadVendida.ToString("0.###"))
                             </td>
 
 
                             <td>
 
                                 <strong>
-                                    ₡@producto.TotalVendido.ToString("N2")
+                                    ₡@(producto.TotalVendido.ToString("N2"))
                                 </strong>
 
                             </td>
@@ -260,7 +316,7 @@
                             <td>
 
                                 <strong>
-                                    ₡@producto.GananciaBruta.ToString("N2")
+                                    ₡@(producto.GananciaBruta.ToString("N2"))
                                 </strong>
 
                             </td>
@@ -280,14 +336,21 @@
     {
         <div class="empty-state">
 
-            <i class="bi bi-trophy"></i>
+            <i class="bi bi-bar-chart"></i>
 
-            <strong class="d-block mb-1">
+
+            <strong class="d-block">
+
                 No existen ventas
+
             </strong>
 
-            <span>
-                No hay productos vendidos en el período seleccionado.
+
+            <span class="text-muted">
+
+                No existen productos vendidos
+                para el período seleccionado.
+
             </span>
 
         </div>

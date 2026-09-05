@@ -4,41 +4,27 @@
 @{
     ViewData["Title"] = "Nueva venta";
 
-
     var productosJson =
         JsonSerializer.Serialize(
             Model.Productos.Select(
                 x => new
                 {
-                    idProducto =
-                        x.IdProducto,
-
-                    codigo =
-                        x.Codigo,
-
-                    nombre =
-                        x.Nombre,
-
-                    precioVenta =
-                        x.PrecioVenta,
-
-                    stockActual =
-                        x.StockActual
+                    idProducto = x.IdProducto,
+                    codigo = x.Codigo,
+                    nombre = x.Nombre,
+                    precioVenta = x.PrecioVenta,
+                    stockActual = x.StockActual
                 }
             )
         );
-
 
     var detallesJson =
         JsonSerializer.Serialize(
             Model.Detalles.Select(
                 x => new
                 {
-                    idProducto =
-                        x.IdProducto,
-
-                    cantidad =
-                        x.Cantidad
+                    idProducto = x.IdProducto,
+                    cantidad = x.Cantidad
                 }
             )
         );
@@ -95,7 +81,7 @@
 
 
     <!-- =====================================================
-         INFORMACION GENERAL
+         INFORMACIÓN GENERAL
     ====================================================== -->
 
     <div class="content-card mb-4">
@@ -117,6 +103,8 @@
 
             <div class="row g-4">
 
+
+                <!-- CLIENTE -->
 
                 <div class="col-md-8">
 
@@ -157,6 +145,8 @@
 
                 </div>
 
+
+                <!-- IMPUESTO -->
 
                 <div class="col-md-4">
 
@@ -219,6 +209,8 @@
             <div class="row g-3 align-items-end">
 
 
+                <!-- PRODUCTO -->
+
                 <div class="col-xl-7">
 
                     <label class="form-label">
@@ -236,13 +228,13 @@
 
                         @foreach (var producto in Model.Productos)
                         {
-                            if (producto.StockActual > 0)
+                            if (producto.StockActual >= 1)
                             {
                                 <option value="@producto.IdProducto">
 
                                     @producto.Codigo -
                                     @producto.Nombre -
-                                    Stock: @producto.StockActual
+                                    Stock: @producto.StockActual.ToString("0")
 
                                 </option>
                             }
@@ -264,6 +256,8 @@
                 </div>
 
 
+                <!-- CANTIDAD -->
+
                 <div class="col-xl-3 col-md-6">
 
                     <label class="form-label">
@@ -274,12 +268,14 @@
                     <input type="number"
                            id="cantidadNueva"
                            class="form-control"
-                           min="0.001"
-                           step="0.001"
+                           min="1"
+                           step="1"
                            value="1" />
 
                 </div>
 
+
+                <!-- AGREGAR -->
 
                 <div class="col-xl-2 col-md-6">
 
@@ -299,7 +295,7 @@
             </div>
 
 
-            <!-- INFORMACION DEL PRODUCTO -->
+            <!-- INFORMACIÓN DEL PRODUCTO -->
 
             <div id="productoInfo"
                  class="mt-3"
@@ -338,7 +334,9 @@
 
 
 
-        <!-- TABLA DETALLE -->
+        <!-- =================================================
+             TABLA DETALLE
+        ================================================== -->
 
         <div class="table-responsive">
 
@@ -454,9 +452,7 @@
                     <hr />
 
 
-                    <div class="d-flex
-                        justify-content-between
-                        align-items-center">
+                    <div class="d-flex justify-content-between align-items-center">
 
                         <strong>
                             Total
@@ -483,7 +479,9 @@
 
 
 
-    <!-- BOTONES -->
+    <!-- =====================================================
+         BOTONES
+    ====================================================== -->
 
     <div class="d-flex justify-content-end gap-2 mt-4">
 
@@ -496,11 +494,15 @@
 
 
         <button type="submit"
-                class="btn btn-primary btn-lg">
+                class="btn btn-primary btn-lg"
+                id="btnRegistrarVenta">
 
-            <i class="bi bi-check-circle me-1"></i>
+            <i class="bi bi-check-circle me-1"
+               id="iconoRegistrarVenta"></i>
 
-            Registrar venta
+            <span id="textoRegistrarVenta">
+                Registrar venta
+            </span>
 
         </button>
 
@@ -518,11 +520,17 @@
     <script>
 
         const productos =
-            @Html.Raw(productosJson);
+                    @Html.Raw(productosJson);
 
 
         let detalles =
-            @Html.Raw(detallesJson);
+                    @Html.Raw(detallesJson);
+
+
+        const formVenta =
+            document.getElementById(
+                "formVenta"
+            );
 
 
         const selector =
@@ -534,6 +542,12 @@
         const cantidadNueva =
             document.getElementById(
                 "cantidadNueva"
+            );
+
+
+        const agregarProducto =
+            document.getElementById(
+                "agregarProducto"
             );
 
 
@@ -561,6 +575,63 @@
             );
 
 
+        const precioProducto =
+            document.getElementById(
+                "precioProducto"
+            );
+
+
+        const stockProducto =
+            document.getElementById(
+                "stockProducto"
+            );
+
+
+        const subtotalTexto =
+            document.getElementById(
+                "subtotalTexto"
+            );
+
+
+        const impuestoTexto =
+            document.getElementById(
+                "impuestoTexto"
+            );
+
+
+        const totalTexto =
+            document.getElementById(
+                "totalTexto"
+            );
+
+
+        const btnRegistrarVenta =
+            document.getElementById(
+                "btnRegistrarVenta"
+            );
+
+
+        const iconoRegistrarVenta =
+            document.getElementById(
+                "iconoRegistrarVenta"
+            );
+
+
+        const textoRegistrarVenta =
+            document.getElementById(
+                "textoRegistrarVenta"
+            );
+
+
+        let envioEnCurso =
+            false;
+
+
+
+        // =========================================================
+        // FORMATO MONEDA
+        // =========================================================
+
         const formatoCRC =
             new Intl.NumberFormat(
                 "es-CR",
@@ -574,189 +645,269 @@
             );
 
 
-        // =====================================================
-        // SELECCION PRODUCTO
-        // =====================================================
+
+        // =========================================================
+        // FORMATO CANTIDADES
+        //
+        // StockFlow maneja visualmente las existencias
+        // como unidades enteras.
+        //
+        // 98.000 -> 98
+        // 3.000  -> 3
+        // =========================================================
+
+        function formatearCantidad(
+            valor) {
+            const numero =
+                Number(
+                    valor
+                );
+
+
+            if (!Number.isFinite(
+                numero)) {
+                return "0";
+            }
+
+
+            return String(
+                Math.trunc(
+                    numero
+                )
+            );
+        }
+
+
+
+        // =========================================================
+        // OBTENER PRODUCTO
+        // =========================================================
+
+        function obtenerProducto(
+            idProducto) {
+            return productos.find(
+                x =>
+                    Number(
+                        x.idProducto
+                    )
+                    ===
+                    Number(
+                        idProducto
+                    )
+            );
+        }
+
+
+
+        // =========================================================
+        // VALIDAR CANTIDAD ENTERA
+        // =========================================================
+
+        function cantidadEnteraValida(
+            cantidad) {
+            return Number.isFinite(
+                cantidad
+            )
+                &&
+                Number.isInteger(
+                    cantidad
+                )
+                &&
+                cantidad >= 1;
+        }
+
+
+
+        // =========================================================
+        // CAMBIO DE PRODUCTO
+        // =========================================================
 
         selector.addEventListener(
             "change",
-            function () {
-
-                const idProducto =
-                    Number(
+            function() {
+                const producto =
+                    obtenerProducto(
                         this.value
                     );
 
 
-                const producto =
-                    productos.find(
-                        x =>
-                            x.idProducto
-                            ===
-                            idProducto
-                    );
-
-
                 if (!producto) {
-
                     productoInfo.style.display =
                         "none";
+
+
+                    precioProducto.textContent =
+                        "";
+
+
+                    stockProducto.textContent =
+                        "";
+
 
                     return;
                 }
 
 
-                document
-                    .getElementById(
-                        "precioProducto"
-                    )
-                    .textContent =
+                precioProducto.textContent =
                     formatoCRC.format(
                         producto.precioVenta
                     );
 
 
-                document
-                    .getElementById(
-                        "stockProducto"
-                    )
-                    .textContent =
-                    producto.stockActual;
+                stockProducto.textContent =
+                    formatearCantidad(
+                        producto.stockActual
+                    );
 
 
                 productoInfo.style.display =
                     "block";
-
             }
         );
 
 
-        // =====================================================
+
+        // =========================================================
         // AGREGAR PRODUCTO
-        // =====================================================
+        // =========================================================
 
-        document
-            .getElementById(
-                "agregarProducto"
-            )
-            .addEventListener(
-                "click",
-                function () {
-
-                    const idProducto =
-                        Number(
-                            selector.value
-                        );
-
-
-                    const cantidad =
-                        Number(
-                            cantidadNueva.value
-                        );
-
-
-                    const producto =
-                        productos.find(
-                            x =>
-                                x.idProducto
-                                ===
-                                idProducto
-                        );
-
-
-                    if (!producto) {
-
-                        alert(
-                            "Seleccione un producto."
-                        );
-
-                        return;
-                    }
-
-
-                    if (cantidad <= 0) {
-
-                        alert(
-                            "La cantidad debe ser mayor a cero."
-                        );
-
-                        return;
-                    }
-
-
-                    if (cantidad >
-                        producto.stockActual)
-                    {
-
-                        alert(
-                            "No existe stock suficiente. "
-                            +
-                            "Disponible: "
-                            +
-                            producto.stockActual
-                        );
-
-                        return;
-                    }
-
-
-                    const existente =
-                        detalles.some(
-                            x =>
-                                Number(
-                                    x.idProducto
-                                )
-                                ===
-                                idProducto
-                        );
-
-
-                    if (existente) {
-
-                        alert(
-                            "Este producto ya fue agregado."
-                        );
-
-                        return;
-                    }
-
-
-                    detalles.push(
-                        {
-                            idProducto:
-                                idProducto,
-
-                            cantidad:
-                                cantidad
-                        }
+        agregarProducto.addEventListener(
+            "click",
+            function() {
+                const idProducto =
+                    Number(
+                        selector.value
                     );
 
 
-                    selector.value =
-                        "";
+                const cantidad =
+                    Number(
+                        cantidadNueva.value
+                    );
 
 
-                    cantidadNueva.value =
-                        1;
+                const producto =
+                    obtenerProducto(
+                        idProducto
+                    );
 
 
-                    productoInfo.style.display =
-                        "none";
+                if (!producto) {
+                    alert(
+                        "Seleccione un producto."
+                    );
 
+                    selector.focus();
 
-                    renderizar();
-
+                    return;
                 }
-            );
 
 
-        // =====================================================
-        // ELIMINAR
-        // =====================================================
+                if (!cantidadEnteraValida(
+                    cantidad)) {
+                    alert(
+                        "La cantidad debe ser un número entero mayor a cero."
+                    );
+
+                    cantidadNueva.focus();
+
+                    return;
+                }
+
+
+                if (
+                    cantidad
+                    >
+                    Number(
+                        producto.stockActual
+                    )
+                ) {
+                    alert(
+                        "No existe stock suficiente. Disponible: "
+                        +
+                        formatearCantidad(
+                            producto.stockActual
+                        )
+                    );
+
+                    cantidadNueva.focus();
+
+                    return;
+                }
+
+
+                const existente =
+                    detalles.some(
+                        x =>
+                            Number(
+                                x.idProducto
+                            )
+                            ===
+                            idProducto
+                    );
+
+
+                if (existente) {
+                    alert(
+                        "Este producto ya fue agregado."
+                    );
+
+                    return;
+                }
+
+
+                detalles.push(
+                    {
+                        idProducto:
+                            idProducto,
+
+                        cantidad:
+                            cantidad
+                    }
+                );
+
+
+                selector.value =
+                    "";
+
+
+                cantidadNueva.value =
+                    "1";
+
+
+                productoInfo.style.display =
+                    "none";
+
+
+                precioProducto.textContent =
+                    "";
+
+
+                stockProducto.textContent =
+                    "";
+
+
+                renderizar();
+            }
+        );
+
+
+
+        // =========================================================
+        // ELIMINAR PRODUCTO
+        // =========================================================
 
         function eliminarProducto(
-            indice)
-        {
+            indice) {
+            if (
+                indice < 0
+                ||
+                indice >= detalles.length
+            ) {
+                return;
+            }
+
+
             detalles.splice(
                 indice,
                 1
@@ -767,14 +918,14 @@
         }
 
 
-        // =====================================================
+
+        // =========================================================
         // CAMBIAR CANTIDAD
-        // =====================================================
+        // =========================================================
 
         function cambiarCantidad(
             indice,
-            valor)
-        {
+            valor) {
             const cantidad =
                 Number(
                     valor
@@ -785,28 +936,30 @@
                 detalles[indice];
 
 
+            if (!detalle) {
+                return;
+            }
+
+
             const producto =
-                productos.find(
-                    x =>
-                        x.idProducto
-                        ===
-                        Number(
-                            detalle.idProducto
-                        )
+                obtenerProducto(
+                    detalle.idProducto
                 );
 
 
             if (!producto) {
+                renderizar();
 
                 return;
             }
 
 
-            if (cantidad <= 0) {
-
+            if (!cantidadEnteraValida(
+                cantidad)) {
                 alert(
-                    "La cantidad debe ser mayor a cero."
+                    "La cantidad debe ser un número entero mayor a cero."
                 );
+
 
                 renderizar();
 
@@ -814,14 +967,19 @@
             }
 
 
-            if (cantidad >
-                producto.stockActual)
-            {
-
+            if (
+                cantidad
+                >
+                Number(
+                    producto.stockActual
+                )
+            ) {
                 alert(
                     "Stock insuficiente. Disponible: "
                     +
-                    producto.stockActual
+                    formatearCantidad(
+                        producto.stockActual
+                    )
                 );
 
 
@@ -831,8 +989,7 @@
             }
 
 
-            detalles[indice]
-                .cantidad =
+            detalles[indice].cantidad =
                 cantidad;
 
 
@@ -840,42 +997,362 @@
         }
 
 
-        // =====================================================
-        // RENDER
-        // =====================================================
 
-        function renderizar()
-        {
-            tabla.innerHTML =
-                "";
+        // =========================================================
+        // CELDA PRODUCTO
+        // =========================================================
+
+        function crearCeldaProducto(
+            producto,
+            detalle,
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const nombre =
+                document.createElement(
+                    "strong"
+                );
+
+
+            nombre.textContent =
+                producto.nombre ?? "";
+
+
+            const codigo =
+                document.createElement(
+                    "div"
+                );
+
+
+            codigo.className =
+                "small text-muted";
+
+
+            codigo.textContent =
+                producto.codigo ?? "";
+
+
+            const idInput =
+                document.createElement(
+                    "input"
+                );
+
+
+            idInput.type =
+                "hidden";
+
+
+            idInput.name =
+                `Detalles[${indice}].IdProducto`;
+
+
+            idInput.value =
+                String(
+                    detalle.idProducto
+                );
+
+
+            celda.appendChild(
+                nombre
+            );
+
+
+            celda.appendChild(
+                codigo
+            );
+
+
+            celda.appendChild(
+                idInput
+            );
+
+
+            return celda;
+        }
+
+
+
+        // =========================================================
+        // CELDA STOCK
+        // =========================================================
+
+        function crearCeldaStock(
+            producto) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const badge =
+                document.createElement(
+                    "span"
+                );
+
+
+            badge.className =
+                "badge bg-light text-dark";
+
+
+            badge.textContent =
+                formatearCantidad(
+                    producto.stockActual
+                );
+
+
+            celda.appendChild(
+                badge
+            );
+
+
+            return celda;
+        }
+
+
+
+        // =========================================================
+        // CELDA CANTIDAD
+        // =========================================================
+
+        function crearCeldaCantidad(
+            detalle,
+            producto,
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const input =
+                document.createElement(
+                    "input"
+                );
+
+
+            input.type =
+                "number";
+
+
+            input.className =
+                "form-control form-control-sm";
+
+
+            input.name =
+                `Detalles[${indice}].Cantidad`;
+
+
+            input.min =
+                "1";
+
+
+            input.max =
+                String(
+                    Math.floor(
+                        Number(
+                            producto.stockActual
+                        )
+                    )
+                );
+
+
+            input.step =
+                "1";
+
+
+            input.value =
+                String(
+                    Math.trunc(
+                        Number(
+                            detalle.cantidad
+                        )
+                    )
+                );
+
+
+            input.addEventListener(
+                "change",
+                function() {
+                    cambiarCantidad(
+                        indice,
+                        this.value
+                    );
+                }
+            );
+
+
+            celda.appendChild(
+                input
+            );
+
+
+            return celda;
+        }
+
+
+
+        // =========================================================
+        // CELDA PRECIO
+        // =========================================================
+
+        function crearCeldaPrecio(
+            producto) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            celda.textContent =
+                formatoCRC.format(
+                    producto.precioVenta
+                );
+
+
+            return celda;
+        }
+
+
+
+        // =========================================================
+        // CELDA SUBTOTAL
+        // =========================================================
+
+        function crearCeldaSubtotal(
+            subtotal) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            const texto =
+                document.createElement(
+                    "strong"
+                );
+
+
+            texto.textContent =
+                formatoCRC.format(
+                    subtotal
+                );
+
+
+            celda.appendChild(
+                texto
+            );
+
+
+            return celda;
+        }
+
+
+
+        // =========================================================
+        // CELDA ELIMINAR
+        // =========================================================
+
+        function crearCeldaEliminar(
+            indice) {
+            const celda =
+                document.createElement(
+                    "td"
+                );
+
+
+            celda.className =
+                "text-end";
+
+
+            const boton =
+                document.createElement(
+                    "button"
+                );
+
+
+            boton.type =
+                "button";
+
+
+            boton.className =
+                "btn btn-sm btn-outline-danger";
+
+
+            boton.title =
+                "Eliminar producto";
+
+
+            boton.setAttribute(
+                "aria-label",
+                "Eliminar producto"
+            );
+
+
+            const icono =
+                document.createElement(
+                    "i"
+                );
+
+
+            icono.className =
+                "bi bi-trash";
+
+
+            boton.appendChild(
+                icono
+            );
+
+
+            boton.addEventListener(
+                "click",
+                function() {
+                    eliminarProducto(
+                        indice
+                    );
+                }
+            );
+
+
+            celda.appendChild(
+                boton
+            );
+
+
+            return celda;
+        }
+
+
+
+        // =========================================================
+        // RENDERIZAR TABLA
+        // =========================================================
+
+        function renderizar() {
+            tabla.replaceChildren();
 
 
             sinProductos.style.display =
                 detalles.length === 0
-                ? "block"
-                : "none";
+                    ? "block"
+                    : "none";
 
 
             detalles.forEach(
                 (
                     detalle,
                     indice
-                ) =>
-                {
-
+                ) => {
                     const producto =
-                        productos.find(
-                            x =>
-                                x.idProducto
-                                ===
-                                Number(
-                                    detalle.idProducto
-                                )
+                        obtenerProducto(
+                            detalle.idProducto
                         );
 
 
                     if (!producto) {
-
                         return;
                     }
 
@@ -896,94 +1373,55 @@
                         );
 
 
-                    fila.innerHTML = `
-
-                        <td>
-
-                            <strong>
-                                ${producto.nombre}
-                            </strong>
-
-                            <div class="small text-muted">
-                                ${producto.codigo}
-                            </div>
-
-                            <input
-                                type="hidden"
-                                name="Detalles[${indice}].IdProducto"
-                                value="${detalle.idProducto}" />
-
-                        </td>
+                    fila.appendChild(
+                        crearCeldaProducto(
+                            producto,
+                            detalle,
+                            indice
+                        )
+                    );
 
 
-                        <td>
-
-                            <span class="badge bg-light text-dark">
-
-                                ${producto.stockActual}
-
-                            </span>
-
-                        </td>
+                    fila.appendChild(
+                        crearCeldaStock(
+                            producto
+                        )
+                    );
 
 
-                        <td>
-
-                            <input
-                                type="number"
-                                class="form-control form-control-sm"
-                                name="Detalles[${indice}].Cantidad"
-                                min="0.001"
-                                max="${producto.stockActual}"
-                                step="0.001"
-                                value="${detalle.cantidad}"
-                                onchange="cambiarCantidad(${indice}, this.value)" />
-
-                        </td>
+                    fila.appendChild(
+                        crearCeldaCantidad(
+                            detalle,
+                            producto,
+                            indice
+                        )
+                    );
 
 
-                        <td>
-
-                            ${formatoCRC.format(
-                                producto.precioVenta
-                            )}
-
-                        </td>
+                    fila.appendChild(
+                        crearCeldaPrecio(
+                            producto
+                        )
+                    );
 
 
-                        <td>
-
-                            <strong>
-
-                                ${formatoCRC.format(
-                                    subtotal
-                                )}
-
-                            </strong>
-
-                        </td>
+                    fila.appendChild(
+                        crearCeldaSubtotal(
+                            subtotal
+                        )
+                    );
 
 
-                        <td class="text-end">
-
-                            <button
-                                type="button"
-                                class="btn btn-sm btn-outline-danger"
-                                onclick="eliminarProducto(${indice})">
-
-                                <i class="bi bi-trash"></i>
-
-                            </button>
-
-                        </td>
-
-                    `;
+                    fila.appendChild(
+                        crearCeldaEliminar(
+                            indice
+                        )
+                    );
 
 
                     tabla.appendChild(
                         fila
                     );
-
                 }
             );
 
@@ -992,33 +1430,25 @@
         }
 
 
-        // =====================================================
-        // TOTALES
-        // =====================================================
 
-        function actualizarTotales()
-        {
+        // =========================================================
+        // ACTUALIZAR TOTALES
+        // =========================================================
+
+        function actualizarTotales() {
             const subtotal =
                 detalles.reduce(
                     (
                         acumulado,
                         detalle
-                    ) =>
-                    {
-
+                    ) => {
                         const producto =
-                            productos.find(
-                                x =>
-                                    x.idProducto
-                                    ===
-                                    Number(
-                                        detalle.idProducto
-                                    )
+                            obtenerProducto(
+                                detalle.idProducto
                             );
 
 
                         if (!producto) {
-
                             return acumulado;
                         }
 
@@ -1034,7 +1464,6 @@
                                     producto.precioVenta
                                 )
                             );
-
                     },
                     0
                 );
@@ -1043,15 +1472,22 @@
             const porcentaje =
                 Number(
                     porcentajeImpuesto.value
+                );
+
+
+            const porcentajeValido =
+                Number.isFinite(
+                    porcentaje
                 )
-                || 0;
+                    ? porcentaje
+                    : 0;
 
 
             const impuesto =
                 subtotal
                 *
                 (
-                    porcentaje
+                    porcentajeValido
                     /
                     100
                 );
@@ -1063,113 +1499,180 @@
                 impuesto;
 
 
-            document
-                .getElementById(
-                    "subtotalTexto"
-                )
-                .textContent =
+            subtotalTexto.textContent =
                 formatoCRC.format(
                     subtotal
                 );
 
 
-            document
-                .getElementById(
-                    "impuestoTexto"
-                )
-                .textContent =
+            impuestoTexto.textContent =
                 formatoCRC.format(
                     impuesto
                 );
 
 
-            document
-                .getElementById(
-                    "totalTexto"
-                )
-                .textContent =
+            totalTexto.textContent =
                 formatoCRC.format(
                     total
                 );
         }
 
 
-        porcentajeImpuesto
-            .addEventListener(
-                "input",
-                actualizarTotales
-            );
+
+        porcentajeImpuesto.addEventListener(
+            "input",
+            actualizarTotales
+        );
 
 
-        // =====================================================
-        // VALIDACION FINAL
-        // =====================================================
 
-        document
-            .getElementById(
-                "formVenta"
-            )
-            .addEventListener(
-                "submit",
-                function (event) {
+        // =========================================================
+        // VALIDAR TODOS LOS DETALLES ANTES DEL SUBMIT
+        // =========================================================
 
-                    if (
-                        detalles.length === 0
-                    ) {
+        function detallesValidos() {
+            if (detalles.length === 0) {
+                alert(
+                    "Debe agregar al menos un producto."
+                );
 
-                        event.preventDefault();
+                return false;
+            }
 
 
-                        alert(
-                            "Debe agregar al menos un producto."
-                        );
+            for (const detalle of detalles) {
+                const producto =
+                    obtenerProducto(
+                        detalle.idProducto
+                    );
 
 
-                        return;
-                    }
+                if (!producto) {
+                    alert(
+                        "Uno de los productos seleccionados ya no está disponible."
+                    );
 
-
-                    for (
-                        const detalle
-                        of detalles
-                    )
-                    {
-
-                        const producto =
-                            productos.find(
-                                x =>
-                                    x.idProducto
-                                    ===
-                                    Number(
-                                        detalle.idProducto
-                                    )
-                            );
-
-
-                        if (
-                            !producto
-                            ||
-                            detalle.cantidad
-                            >
-                            producto.stockActual
-                        )
-                        {
-
-                            event.preventDefault();
-
-
-                            alert(
-                                "Uno de los productos supera el stock disponible."
-                            );
-
-
-                            return;
-                        }
-
-                    }
-
+                    return false;
                 }
-            );
+
+
+                const cantidad =
+                    Number(
+                        detalle.cantidad
+                    );
+
+
+                if (!cantidadEnteraValida(
+                    cantidad)) {
+                    alert(
+                        "Todas las cantidades deben ser números enteros mayores a cero."
+                    );
+
+                    return false;
+                }
+
+
+                if (
+                    cantidad
+                    >
+                    Number(
+                        producto.stockActual
+                    )
+                ) {
+                    alert(
+                        "Uno de los productos supera el stock disponible."
+                    );
+
+                    return false;
+                }
+            }
+
+
+            return true;
+        }
+
+
+
+        // =========================================================
+        // BLOQUEAR FORMULARIO
+        // EVITA DOBLE REGISTRO
+        // =========================================================
+
+        function bloquearFormulario() {
+            envioEnCurso =
+                true;
+
+
+            btnRegistrarVenta.disabled =
+                true;
+
+
+            agregarProducto.disabled =
+                true;
+
+
+            iconoRegistrarVenta.className =
+                "bi bi-hourglass-split me-1";
+
+
+            textoRegistrarVenta.textContent =
+                "Registrando...";
+        }
+
+
+
+        // =========================================================
+        // SUBMIT
+        // =========================================================
+
+        formVenta.addEventListener(
+            "submit",
+            function(event) {
+                if (envioEnCurso) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                if (!detallesValidos()) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                if (!formVenta.checkValidity()) {
+                    event.preventDefault();
+
+                    formVenta.reportValidity();
+
+                    return;
+                }
+
+
+                if (
+                    typeof window.jQuery
+                    !==
+                    "undefined"
+                    &&
+                    typeof window.jQuery.fn.valid
+                    ===
+                    "function"
+                    &&
+                    !window.jQuery(
+                        formVenta
+                    ).valid()
+                ) {
+                    event.preventDefault();
+
+                    return;
+                }
+
+
+                bloquearFormulario();
+            }
+        );
 
 
         renderizar();

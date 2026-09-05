@@ -32,7 +32,9 @@ namespace StockFlowWEB.Controllers
         {
             var token =
                 HttpContext.Session
-                    .GetString("Token");
+                    .GetString(
+                        "Token"
+                    );
 
 
             var client =
@@ -42,11 +44,15 @@ namespace StockFlowWEB.Controllers
                     );
 
 
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue(
-                    "Bearer",
-                    token
-                );
+            if (!string.IsNullOrWhiteSpace(
+                token))
+            {
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue(
+                        "Bearer",
+                        token
+                    );
+            }
 
 
             return client;
@@ -54,11 +60,12 @@ namespace StockFlowWEB.Controllers
 
 
         // =========================================================
-        // CONSULTAR CATEGORIAS ACTIVAS
+        // CONSULTAR CATEGORÍAS ACTIVAS
         // =========================================================
 
-        private List<CategoriaResponse> ConsultarCategorias(
-            HttpClient client)
+        private List<CategoriaResponse>
+            ConsultarCategorias(
+                HttpClient client)
         {
             var response =
                 client.GetAsync(
@@ -80,8 +87,12 @@ namespace StockFlowWEB.Controllers
 
 
             return categorias?
-                .Where(x => x.Estado)
-                .OrderBy(x => x.Nombre)
+                .Where(
+                    x => x.Estado
+                )
+                .OrderBy(
+                    x => x.Nombre
+                )
                 .ToList()
                 ??
                 new List<CategoriaResponse>();
@@ -107,7 +118,7 @@ namespace StockFlowWEB.Controllers
 
 
                 // =============================================
-                // CATEGORIAS
+                // CATEGORÍAS
                 // =============================================
 
                 var categorias =
@@ -140,6 +151,10 @@ namespace StockFlowWEB.Controllers
                     };
 
 
+                // =============================================
+                // API
+                // =============================================
+
                 var response =
                     client.PostAsJsonAsync(
                         "api/Producto/ConsultarProductosPaginadoAPI",
@@ -147,10 +162,18 @@ namespace StockFlowWEB.Controllers
                     ).Result;
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Unauthorized)
+                // =============================================
+                // 401
+                // =============================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Unauthorized
+                )
                 {
                     HttpContext.Session.Clear();
+
 
                     return RedirectToAction(
                         "Index",
@@ -158,6 +181,10 @@ namespace StockFlowWEB.Controllers
                     );
                 }
 
+
+                // =============================================
+                // ERROR
+                // =============================================
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -175,6 +202,10 @@ namespace StockFlowWEB.Controllers
                 }
 
 
+                // =============================================
+                // RESULTADO
+                // =============================================
+
                 var resultado =
                     response.Content
                         .ReadFromJsonAsync
@@ -183,7 +214,8 @@ namespace StockFlowWEB.Controllers
 
 
                 resultado ??=
-                    new PaginacionResponse<ProductoResponse>();
+                    new PaginacionResponse
+                    <ProductoResponse>();
 
 
                 var viewModel =
@@ -240,10 +272,6 @@ namespace StockFlowWEB.Controllers
         // =========================================================
 
         [HttpGet]
-        [SessionAuthorize(
-            "Administrador",
-            "Empleado"
-        )]
         public IActionResult Registrar()
         {
             try
@@ -281,20 +309,23 @@ namespace StockFlowWEB.Controllers
 
         // =========================================================
         // REGISTRAR - POST
+        //
+        // EL CÓDIGO YA NO SE ENVÍA.
+        // SQL SERVER LO GENERA AUTOMÁTICAMENTE.
         // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SessionAuthorize(
-            "Administrador",
-            "Empleado"
-        )]
         public IActionResult Registrar(
             ProductoFormViewModel model)
         {
             var client =
                 CrearClienteAPI();
 
+
+            // =====================================================
+            // VALIDACIONES DEL VIEWMODEL
+            // =====================================================
 
             if (!ModelState.IsValid)
             {
@@ -312,14 +343,18 @@ namespace StockFlowWEB.Controllers
 
             try
             {
+                // =================================================
+                // REQUEST
+                //
+                // IMPORTANTE:
+                // NO SE ENVÍA CODIGO.
+                // =================================================
+
                 var request =
                     new RegistrarProductoRequest
                     {
                         IdCategoria =
                             model.IdCategoria,
-
-                        Codigo =
-                            model.Codigo.Trim(),
 
                         Nombre =
                             model.Nombre.Trim(),
@@ -338,6 +373,10 @@ namespace StockFlowWEB.Controllers
                     };
 
 
+                // =================================================
+                // API
+                // =================================================
+
                 var response =
                     client.PostAsJsonAsync(
                         "api/Producto/RegistrarProductoAPI",
@@ -345,10 +384,18 @@ namespace StockFlowWEB.Controllers
                     ).Result;
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Unauthorized)
+                // =================================================
+                // 401
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Unauthorized
+                )
                 {
                     HttpContext.Session.Clear();
+
 
                     return RedirectToAction(
                         "Index",
@@ -357,8 +404,35 @@ namespace StockFlowWEB.Controllers
                 }
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Created)
+                // =================================================
+                // 403
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Forbidden
+                )
+                {
+                    TempData["MensajeError"] =
+                        "No tiene permisos para registrar productos.";
+
+
+                    return RedirectToAction(
+                        "Index"
+                    );
+                }
+
+
+                // =================================================
+                // 201 CREATED
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Created
+                )
                 {
                     TempData["MensajeExito"] =
                         "Producto registrado correctamente.";
@@ -369,6 +443,10 @@ namespace StockFlowWEB.Controllers
                     );
                 }
 
+
+                // =================================================
+                // ERROR CONTROLADO
+                // =================================================
 
                 var error =
                     response.Content
@@ -417,10 +495,6 @@ namespace StockFlowWEB.Controllers
         // =========================================================
 
         [HttpGet]
-        [SessionAuthorize(
-            "Administrador",
-            "Empleado"
-        )]
         public IActionResult Modificar(
             long id)
         {
@@ -430,16 +504,28 @@ namespace StockFlowWEB.Controllers
                     CrearClienteAPI();
 
 
+                // =================================================
+                // API
+                // =================================================
+
                 var response =
                     client.GetAsync(
                         $"api/Producto/ConsultarProductoAPI/{id}"
                     ).Result;
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Unauthorized)
+                // =================================================
+                // 401
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Unauthorized
+                )
                 {
                     HttpContext.Session.Clear();
+
 
                     return RedirectToAction(
                         "Index",
@@ -448,8 +534,15 @@ namespace StockFlowWEB.Controllers
                 }
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.NotFound)
+                // =================================================
+                // 404
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.NotFound
+                )
                 {
                     TempData["MensajeError"] =
                         "El producto no existe.";
@@ -460,6 +553,10 @@ namespace StockFlowWEB.Controllers
                     );
                 }
 
+
+                // =================================================
+                // ERROR
+                // =================================================
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -473,6 +570,10 @@ namespace StockFlowWEB.Controllers
                 }
 
 
+                // =================================================
+                // PRODUCTO
+                // =================================================
+
                 var producto =
                     response.Content
                         .ReadFromJsonAsync
@@ -482,11 +583,22 @@ namespace StockFlowWEB.Controllers
 
                 if (producto == null)
                 {
+                    TempData["MensajeError"] =
+                        "No fue posible consultar el producto.";
+
+
                     return RedirectToAction(
                         "Index"
                     );
                 }
 
+
+                // =================================================
+                // VIEWMODEL
+                //
+                // AQUÍ SÍ CONSERVAMOS CODIGO PORQUE SOLO
+                // LO MOSTRAMOS COMO READONLY.
+                // =================================================
 
                 var viewModel =
                     new ProductoFormViewModel
@@ -541,20 +653,23 @@ namespace StockFlowWEB.Controllers
 
         // =========================================================
         // MODIFICAR - POST
+        //
+        // EL CÓDIGO NO SE ENVÍA.
+        // NO SE PUEDE CAMBIAR.
         // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SessionAuthorize(
-            "Administrador",
-            "Empleado"
-        )]
         public IActionResult Modificar(
             ProductoFormViewModel model)
         {
             var client =
                 CrearClienteAPI();
 
+
+            // =====================================================
+            // VALIDACIÓN
+            // =====================================================
 
             if (!ModelState.IsValid)
             {
@@ -572,6 +687,13 @@ namespace StockFlowWEB.Controllers
 
             try
             {
+                // =================================================
+                // REQUEST
+                //
+                // IMPORTANTE:
+                // NO SE ENVÍA CODIGO.
+                // =================================================
+
                 var request =
                     new ModificarProductoRequest
                     {
@@ -580,9 +702,6 @@ namespace StockFlowWEB.Controllers
 
                         IdCategoria =
                             model.IdCategoria,
-
-                        Codigo =
-                            model.Codigo.Trim(),
 
                         Nombre =
                             model.Nombre.Trim(),
@@ -601,6 +720,10 @@ namespace StockFlowWEB.Controllers
                     };
 
 
+                // =================================================
+                // API
+                // =================================================
+
                 var response =
                     client.PutAsJsonAsync(
                         "api/Producto/ModificarProductoAPI",
@@ -608,10 +731,18 @@ namespace StockFlowWEB.Controllers
                     ).Result;
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Unauthorized)
+                // =================================================
+                // 401
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Unauthorized
+                )
                 {
                     HttpContext.Session.Clear();
+
 
                     return RedirectToAction(
                         "Index",
@@ -620,8 +751,55 @@ namespace StockFlowWEB.Controllers
                 }
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.OK)
+                // =================================================
+                // 403
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Forbidden
+                )
+                {
+                    TempData["MensajeError"] =
+                        "No tiene permisos para modificar productos.";
+
+
+                    return RedirectToAction(
+                        "Index"
+                    );
+                }
+
+
+                // =================================================
+                // 404
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.NotFound
+                )
+                {
+                    TempData["MensajeError"] =
+                        "El producto no existe.";
+
+
+                    return RedirectToAction(
+                        "Index"
+                    );
+                }
+
+
+                // =================================================
+                // 200 OK
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.OK
+                )
                 {
                     TempData["MensajeExito"] =
                         "Producto modificado correctamente.";
@@ -632,6 +810,10 @@ namespace StockFlowWEB.Controllers
                     );
                 }
 
+
+                // =================================================
+                // ERROR CONTROLADO
+                // =================================================
 
                 var error =
                     response.Content
@@ -695,10 +877,18 @@ namespace StockFlowWEB.Controllers
                     ).Result;
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Unauthorized)
+                // =================================================
+                // 401
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Unauthorized
+                )
                 {
                     HttpContext.Session.Clear();
+
 
                     return RedirectToAction(
                         "Index",
@@ -707,8 +897,15 @@ namespace StockFlowWEB.Controllers
                 }
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.NotFound)
+                // =================================================
+                // 404
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.NotFound
+                )
                 {
                     TempData["MensajeError"] =
                         "El producto no existe.";
@@ -719,6 +916,10 @@ namespace StockFlowWEB.Controllers
                     );
                 }
 
+
+                // =================================================
+                // ERROR
+                // =================================================
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -732,6 +933,10 @@ namespace StockFlowWEB.Controllers
                 }
 
 
+                // =================================================
+                // PRODUCTO
+                // =================================================
+
                 var producto =
                     response.Content
                         .ReadFromJsonAsync
@@ -741,6 +946,10 @@ namespace StockFlowWEB.Controllers
 
                 if (producto == null)
                 {
+                    TempData["MensajeError"] =
+                        "No fue posible consultar el producto.";
+
+
                     return RedirectToAction(
                         "Index"
                     );
@@ -766,13 +975,11 @@ namespace StockFlowWEB.Controllers
 
         // =========================================================
         // CAMBIAR ESTADO
+        // SOLO ADMINISTRADOR EN API
         // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [SessionAuthorize(
-            "Administrador"
-        )]
         public IActionResult CambiarEstado(
             long id)
         {
@@ -789,10 +996,18 @@ namespace StockFlowWEB.Controllers
                     ).Result;
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Unauthorized)
+                // =================================================
+                // 401
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Unauthorized
+                )
                 {
                     HttpContext.Session.Clear();
+
 
                     return RedirectToAction(
                         "Index",
@@ -801,8 +1016,15 @@ namespace StockFlowWEB.Controllers
                 }
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.Forbidden)
+                // =================================================
+                // 403
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.Forbidden
+                )
                 {
                     TempData["MensajeError"] =
                         "No tiene permisos para cambiar el estado del producto.";
@@ -814,8 +1036,35 @@ namespace StockFlowWEB.Controllers
                 }
 
 
-                if (response.StatusCode ==
-                    HttpStatusCode.OK)
+                // =================================================
+                // 404
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.NotFound
+                )
+                {
+                    TempData["MensajeError"] =
+                        "El producto no existe.";
+
+
+                    return RedirectToAction(
+                        "Index"
+                    );
+                }
+
+
+                // =================================================
+                // 200 OK
+                // =================================================
+
+                if (
+                    response.StatusCode
+                    ==
+                    HttpStatusCode.OK
+                )
                 {
                     var resultado =
                         response.Content
@@ -835,6 +1084,10 @@ namespace StockFlowWEB.Controllers
                     );
                 }
 
+
+                // =================================================
+                // ERROR
+                // =================================================
 
                 var error =
                     response.Content

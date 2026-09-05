@@ -193,6 +193,7 @@
 
             </div>
 
+
             <p class="kpi-value">
 
                 @Model.Resumen.ProductosActivos
@@ -271,7 +272,7 @@
 
 
 <!-- =========================================================
-     CHART
+     GRÁFICO
 ========================================================= -->
 
 <div class="row g-3 mb-4">
@@ -313,13 +314,15 @@
 
 
 <!-- =========================================================
-     TABLES
+     TABLAS INFERIORES
 ========================================================= -->
 
 <div class="row g-3">
 
 
-    <!-- STOCK BAJO -->
+    <!-- =====================================================
+         PRODUCTOS CON STOCK BAJO
+    ====================================================== -->
 
     <div class="col-xl-6">
 
@@ -392,7 +395,7 @@
 
                                         <span class="badge-stock">
 
-                                            @producto.StockActual
+                                            @producto.StockActual.ToString("0")
 
                                         </span>
 
@@ -401,7 +404,7 @@
 
                                     <td>
 
-                                        @producto.StockMinimo
+                                        @producto.StockMinimo.ToString("0")
 
                                     </td>
 
@@ -435,7 +438,9 @@
 
 
 
-    <!-- MAS VENDIDOS -->
+    <!-- =====================================================
+         PRODUCTOS MÁS VENDIDOS
+    ====================================================== -->
 
     <div class="col-xl-6">
 
@@ -506,7 +511,7 @@
 
                                     <td>
 
-                                        @producto.CantidadVendida
+                                        @producto.CantidadVendida.ToString("0")
 
                                     </td>
 
@@ -553,7 +558,6 @@
 @section Scripts
 {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 
     <script>
 

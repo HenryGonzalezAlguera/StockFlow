@@ -235,8 +235,8 @@
                     <input type="number"
                            id="cantidadNueva"
                            class="form-control"
-                           min="0.001"
-                           step="0.001"
+                           min="1"
+                           step="1"
                            value="1" />
 
                 </div>
@@ -441,7 +441,6 @@
 
 </form>
 
-
 @section Scripts
 {
     <partial name="_ValidationScriptsPartial" />
@@ -549,17 +548,9 @@
             );
 
 
-        // =========================================================
-        // ESTADO
-        // =========================================================
-
         let envioEnCurso =
             false;
 
-
-        // =========================================================
-        // FORMATO MONEDA
-        // =========================================================
 
         const formatoCRC =
             new Intl.NumberFormat(
@@ -573,10 +564,6 @@
                 }
             );
 
-
-        // =========================================================
-        // BUSCAR PRODUCTO
-        // =========================================================
 
         function obtenerProducto(
             idProducto) {
@@ -593,9 +580,19 @@
         }
 
 
-        // =========================================================
-        // PRODUCTO SELECCIONADO
-        // =========================================================
+        function cantidadEnteraValida(
+            cantidad) {
+            return Number.isFinite(
+                cantidad
+            )
+                &&
+                Number.isInteger(
+                    cantidad
+                )
+                &&
+                cantidad >= 1;
+        }
+
 
         selector.addEventListener(
             "change",
@@ -617,10 +614,6 @@
             }
         );
 
-
-        // =========================================================
-        // AGREGAR PRODUCTO
-        // =========================================================
 
         agregarProducto.addEventListener(
             "click",
@@ -649,10 +642,6 @@
                     );
 
 
-                // =================================================
-                // VALIDACIONES
-                // =================================================
-
                 if (!producto) {
                     alert(
                         "Seleccione un producto."
@@ -664,10 +653,10 @@
                 }
 
 
-                if (!Number.isFinite(cantidad) ||
-                    cantidad <= 0) {
+                if (!cantidadEnteraValida(
+                    cantidad)) {
                     alert(
-                        "La cantidad debe ser mayor a cero."
+                        "La cantidad debe ser un número entero mayor a cero."
                     );
 
                     cantidadNueva.focus();
@@ -708,10 +697,6 @@
                 }
 
 
-                // =================================================
-                // AGREGAR
-                // =================================================
-
                 detalles.push(
                     {
                         idProducto:
@@ -725,10 +710,6 @@
                     }
                 );
 
-
-                // =================================================
-                // LIMPIAR CAMPOS
-                // =================================================
 
                 selector.value =
                     "";
@@ -746,10 +727,6 @@
             }
         );
 
-
-        // =========================================================
-        // ELIMINAR
-        // =========================================================
 
         function eliminarProducto(
             indice) {
@@ -769,10 +746,6 @@
         }
 
 
-        // =========================================================
-        // CAMBIAR CANTIDAD
-        // =========================================================
-
         function cambiarCantidad(
             indice,
             valor) {
@@ -782,15 +755,13 @@
                 );
 
 
-            if (!Number.isFinite(cantidad) ||
-                cantidad <= 0) {
+            if (!cantidadEnteraValida(
+                cantidad)) {
                 alert(
-                    "La cantidad debe ser mayor a cero."
+                    "La cantidad debe ser un número entero mayor a cero."
                 );
 
 
-                // Volvemos a dibujar para restaurar
-                // el valor anterior válido.
                 renderizar();
 
                 return;
@@ -809,10 +780,6 @@
             actualizarTotales();
         }
 
-
-        // =========================================================
-        // CAMBIAR COSTO
-        // =========================================================
 
         function cambiarPrecio(
             indice,
@@ -849,15 +816,6 @@
             actualizarTotales();
         }
 
-
-        // =========================================================
-        // CREAR CELDA PRODUCTO
-        //
-        // IMPORTANTE:
-        //
-        // No usamos innerHTML.
-        // Nombre/código van por textContent.
-        // =========================================================
 
         function crearCeldaProducto(
             producto,
@@ -932,10 +890,6 @@
         }
 
 
-        // =========================================================
-        // CREAR CELDA CANTIDAD
-        // =========================================================
-
         function crearCeldaCantidad(
             detalle,
             indice) {
@@ -964,11 +918,11 @@
 
 
             input.min =
-                "0.001";
+                "1";
 
 
             input.step =
-                "0.001";
+                "1";
 
 
             input.value =
@@ -996,10 +950,6 @@
             return celda;
         }
 
-
-        // =========================================================
-        // CREAR CELDA PRECIO
-        // =========================================================
 
         function crearCeldaPrecio(
             detalle,
@@ -1096,10 +1046,6 @@
         }
 
 
-        // =========================================================
-        // CREAR CELDA SUBTOTAL
-        // =========================================================
-
         function crearCeldaSubtotal(
             subtotal) {
             const celda =
@@ -1128,10 +1074,6 @@
             return celda;
         }
 
-
-        // =========================================================
-        // CREAR CELDA ELIMINAR
-        // =========================================================
 
         function crearCeldaEliminar(
             indice) {
@@ -1203,12 +1145,7 @@
         }
 
 
-        // =========================================================
-        // RENDER
-        // =========================================================
-
         function renderizar() {
-            // replaceChildren elimina los hijos sin interpretar HTML.
             tabla.replaceChildren();
 
 
@@ -1300,10 +1237,6 @@
         }
 
 
-        // =========================================================
-        // TOTALES
-        // =========================================================
-
         function actualizarTotales() {
             const subtotal =
                 detalles.reduce(
@@ -1380,10 +1313,6 @@
         );
 
 
-        // =========================================================
-        // VALIDAR DETALLES
-        // =========================================================
-
         function detallesValidos() {
             if (detalles.length === 0) {
                 alert(
@@ -1409,20 +1338,16 @@
                 }
 
 
-                if (
-                    !Number.isFinite(
-                        Number(
-                            detalle.cantidad
-                        )
-                    )
-                    ||
+                const cantidad =
                     Number(
                         detalle.cantidad
-                    )
-                    <= 0
-                ) {
+                    );
+
+
+                if (!cantidadEnteraValida(
+                    cantidad)) {
                     alert(
-                        "Todas las cantidades deben ser mayores a cero."
+                        "Todas las cantidades deben ser números enteros mayores a cero."
                     );
 
                     return false;
@@ -1454,10 +1379,6 @@
         }
 
 
-        // =========================================================
-        // BLOQUEAR DOBLE ENVÍO
-        // =========================================================
-
         function bloquearFormulario() {
             envioEnCurso =
                 true;
@@ -1480,17 +1401,9 @@
         }
 
 
-        // =========================================================
-        // SUBMIT
-        // =========================================================
-
         formCompra.addEventListener(
             "submit",
             function(event) {
-                // =================================================
-                // EVITAR SEGUNDO POST
-                // =================================================
-
                 if (envioEnCurso) {
                     event.preventDefault();
 
@@ -1498,20 +1411,12 @@
                 }
 
 
-                // =================================================
-                // VALIDACIÓN DEL DETALLE
-                // =================================================
-
                 if (!detallesValidos()) {
                     event.preventDefault();
 
                     return;
                 }
 
-
-                // =================================================
-                // VALIDACIÓN HTML
-                // =================================================
 
                 if (!formCompra.checkValidity()) {
                     event.preventDefault();
@@ -1521,10 +1426,6 @@
                     return;
                 }
 
-
-                // =================================================
-                // VALIDACIÓN JQUERY UNOBTRUSIVE
-                // =================================================
 
                 if (
                     typeof window.jQuery
@@ -1545,23 +1446,12 @@
                 }
 
 
-                // =================================================
-                // TODO ESTÁ CORRECTO
-                //
-                // A partir de aquí se permite un único POST.
-                // =================================================
-
                 bloquearFormulario();
             }
         );
 
 
-        // =========================================================
-        // CARGA INICIAL
-        // =========================================================
-
         renderizar();
 
     </script>
-}
 }

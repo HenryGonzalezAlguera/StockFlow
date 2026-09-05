@@ -3,11 +3,13 @@
 namespace StockFlowAPI.Models.Request
 {
     public class ModificarProductoRequest
+        : IValidatableObject
     {
         [Range(
             1,
             long.MaxValue,
-            ErrorMessage = "El producto no es válido."
+            ErrorMessage =
+                "El producto no es válido."
         )]
         public long IdProducto { get; set; }
 
@@ -15,28 +17,20 @@ namespace StockFlowAPI.Models.Request
         [Range(
             1,
             long.MaxValue,
-            ErrorMessage = "Debe seleccionar una categoría."
+            ErrorMessage =
+                "Debe seleccionar una categoría."
         )]
         public long IdCategoria { get; set; }
 
 
         [Required(
-            ErrorMessage = "Debe indicar el código del producto."
-        )]
-        [MaxLength(
-            50,
-            ErrorMessage = "El código no puede superar los 50 caracteres."
-        )]
-        public string Codigo { get; set; }
-            = string.Empty;
-
-
-        [Required(
-            ErrorMessage = "Debe indicar el nombre del producto."
+            ErrorMessage =
+                "Debe indicar el nombre del producto."
         )]
         [MaxLength(
             150,
-            ErrorMessage = "El nombre no puede superar los 150 caracteres."
+            ErrorMessage =
+                "El nombre no puede superar los 150 caracteres."
         )]
         public string Nombre { get; set; }
             = string.Empty;
@@ -44,7 +38,8 @@ namespace StockFlowAPI.Models.Request
 
         [MaxLength(
             300,
-            ErrorMessage = "La descripción no puede superar los 300 caracteres."
+            ErrorMessage =
+                "La descripción no puede superar los 300 caracteres."
         )]
         public string? Descripcion { get; set; }
 
@@ -52,7 +47,8 @@ namespace StockFlowAPI.Models.Request
         [Range(
             0,
             double.MaxValue,
-            ErrorMessage = "El precio de compra no puede ser negativo."
+            ErrorMessage =
+                "El precio de compra no puede ser negativo."
         )]
         public decimal PrecioCompra { get; set; }
 
@@ -60,7 +56,8 @@ namespace StockFlowAPI.Models.Request
         [Range(
             0,
             double.MaxValue,
-            ErrorMessage = "El precio de venta no puede ser negativo."
+            ErrorMessage =
+                "El precio de venta no puede ser negativo."
         )]
         public decimal PrecioVenta { get; set; }
 
@@ -68,8 +65,33 @@ namespace StockFlowAPI.Models.Request
         [Range(
             0,
             double.MaxValue,
-            ErrorMessage = "El stock mínimo no puede ser negativo."
+            ErrorMessage =
+                "El stock mínimo no puede ser negativo."
         )]
         public decimal StockMinimo { get; set; }
+
+
+        public IEnumerable<ValidationResult>
+            Validate(
+                ValidationContext validationContext)
+        {
+            if (
+                StockMinimo
+                !=
+                decimal.Truncate(
+                    StockMinimo
+                )
+            )
+            {
+                yield return
+                    new ValidationResult(
+                        "El stock mínimo debe ser un número entero.",
+                        new[]
+                        {
+                            nameof(StockMinimo)
+                        }
+                    );
+            }
+        }
     }
 }

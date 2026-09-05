@@ -23,16 +23,43 @@
     </div>
 
 
-    <a asp-action="Index"
-       class="btn btn-outline-secondary">
+    <div class="d-flex gap-2 flex-wrap">
 
-        <i class="bi bi-arrow-left me-1"></i>
+        <a asp-controller="ReportePdf"
+           asp-action="ExportarStockBajo"
+           class="btn btn-outline-danger">
 
-        Reportes
+            <i class="bi bi-file-earmark-pdf me-1"></i>
 
-    </a>
+            Exportar PDF
+
+        </a>
+
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+
+            <i class="bi bi-arrow-left me-1"></i>
+
+            Reportes
+
+        </a>
+
+    </div>
 
 </div>
+
+
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-warning">
+
+        <i class="bi bi-exclamation-triangle me-2"></i>
+
+        @TempData["Mensaje"]
+
+    </div>
+}
 
 
 @if (ViewBag.Mensaje != null)
@@ -72,7 +99,7 @@
             </span>
 
             <p class="kpi-value">
-                @totalFaltante.ToString("N3")
+                @totalFaltante.ToString("0.###")
             </p>
 
         </div>
@@ -134,7 +161,7 @@
 
                                 <span class="badge-stock">
 
-                                    @producto.StockActual.ToString("N3")
+                                    @producto.StockActual.ToString("0.###")
 
                                 </span>
 
@@ -142,14 +169,14 @@
 
 
                             <td>
-                                @producto.StockMinimo.ToString("N3")
+                                @producto.StockMinimo.ToString("0.###")
                             </td>
 
 
                             <td>
 
                                 <strong>
-                                    @producto.CantidadFaltante.ToString("N3")
+                                    @producto.CantidadFaltante.ToString("0.###")
                                 </strong>
 
                             </td>

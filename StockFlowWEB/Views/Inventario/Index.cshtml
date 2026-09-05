@@ -382,7 +382,7 @@
                                         ? "+"
                                         : "-")
 
-                                    @movimiento.Cantidad.ToString("N3")
+                                    @movimiento.Cantidad.ToString("0")
 
                                 </strong>
 
@@ -394,13 +394,13 @@
                                 <div class="inventory-stock-change">
 
                                     <span>
-                                        @movimiento.StockAnterior.ToString("N3")
+                                        @movimiento.StockAnterior.ToString("0")
                                     </span>
 
                                     <i class="bi bi-arrow-right"></i>
 
                                     <strong>
-                                        @movimiento.StockNuevo.ToString("N3")
+                                        @movimiento.StockNuevo.ToString("0")
                                     </strong>
 
                                 </div>

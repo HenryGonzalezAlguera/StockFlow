@@ -1,5 +1,16 @@
+using QuestPDF.Infrastructure;
+using StockFlowWEB.Services;
+
 var builder =
     WebApplication.CreateBuilder(args);
+
+
+// =========================================================
+// QUESTPDF
+// =========================================================
+
+QuestPDF.Settings.License =
+    LicenseType.Community;
 
 
 // =========================================================
@@ -8,6 +19,14 @@ var builder =
 
 builder.Services
     .AddControllersWithViews();
+
+
+// =========================================================
+// PDF SERVICES
+// =========================================================
+
+builder.Services
+    .AddScoped<ReportePdfService>();
 
 
 // =========================================================
@@ -42,7 +61,6 @@ builder.Services.AddHttpClient(
                 apiBaseUrl
             );
 
-
         client.Timeout =
             TimeSpan.FromSeconds(30);
     }
@@ -56,52 +74,20 @@ builder.Services.AddHttpClient(
 builder.Services.AddSession(
     options =>
     {
-        // =================================================
-        // TIEMPO DE INACTIVIDAD
-        // =================================================
-
         options.IdleTimeout =
             TimeSpan.FromMinutes(30);
-
-
-        // =================================================
-        // JAVASCRIPT NO PUEDE LEER COOKIE
-        // =================================================
 
         options.Cookie.HttpOnly =
             true;
 
-
-        // =================================================
-        // COOKIE NECESARIA
-        // =================================================
-
         options.Cookie.IsEssential =
             true;
-
-
-        // =================================================
-        // CSRF
-        // =================================================
 
         options.Cookie.SameSite =
             SameSiteMode.Lax;
 
-
-        // =================================================
-        // HTTPS
-        //
-        // SameAsRequest nos permite desarrollo localhost.
-        // En deployment revisaremos esto nuevamente.
-        // =================================================
-
         options.Cookie.SecurePolicy =
             CookieSecurePolicy.SameAsRequest;
-
-
-        // =================================================
-        // NOMBRE COOKIE
-        // =================================================
 
         options.Cookie.Name =
             ".StockFlow.Session";
@@ -131,18 +117,9 @@ var app =
 
 if (!app.Environment.IsDevelopment())
 {
-    // =====================================================
-    // EXCEPCIONES NO CONTROLADAS
-    // =====================================================
-
     app.UseExceptionHandler(
         "/Home/Error"
     );
-
-
-    // =====================================================
-    // HSTS
-    // =====================================================
 
     app.UseHsts();
 }
@@ -150,14 +127,6 @@ if (!app.Environment.IsDevelopment())
 
 // =========================================================
 // STATUS CODES
-//
-// Ejemplo:
-//
-// /pagina-que-no-existe
-//
-// 404
-//   ↓
-// /Home/Estado/404
 // =========================================================
 
 app.UseStatusCodePagesWithReExecute(
@@ -188,8 +157,6 @@ app.UseRouting();
 
 // =========================================================
 // SESSION
-//
-// Debe ejecutarse antes de los controladores.
 // =========================================================
 
 app.UseSession();
