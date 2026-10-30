@@ -1,6 +1,7 @@
 ﻿using BCrypt.Net;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
 using StockFlowAPI.Models;
@@ -225,6 +226,7 @@ namespace StockFlowAPI.Controllers
         // LOGIN
         // =========================================================
 
+        [EnableRateLimiting("LoginPublico")]
         [HttpPost]
         [Route("LoginAPI")]
         public IActionResult LoginAPI(
@@ -360,6 +362,7 @@ namespace StockFlowAPI.Controllers
         // REGISTRAR EMPRESA
         // =========================================================
 
+        [EnableRateLimiting("RegistroEmpresaPublico")]
         [HttpPost]
         [Route("RegistrarEmpresaAPI")]
         public IActionResult RegistrarEmpresaAPI(

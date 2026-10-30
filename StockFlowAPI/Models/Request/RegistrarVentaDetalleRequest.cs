@@ -3,6 +3,7 @@
 namespace StockFlowAPI.Models.Request
 {
     public class RegistrarVentaDetalleRequest
+        : IValidatableObject
     {
         [Range(
             1,
@@ -13,10 +14,34 @@ namespace StockFlowAPI.Models.Request
 
 
         [Range(
-            0.001,
+            1,
             double.MaxValue,
-            ErrorMessage = "La cantidad debe ser mayor a cero."
+            ErrorMessage = "La cantidad debe ser un número entero mayor a cero."
         )]
         public decimal Cantidad { get; set; }
+
+
+        public IEnumerable<ValidationResult>
+            Validate(
+                ValidationContext validationContext)
+        {
+            if (
+                Cantidad
+                !=
+                decimal.Truncate(
+                    Cantidad
+                )
+            )
+            {
+                yield return
+                    new ValidationResult(
+                        "La cantidad debe ser un número entero.",
+                        new[]
+                        {
+                            nameof(Cantidad)
+                        }
+                    );
+            }
+        }
     }
 }

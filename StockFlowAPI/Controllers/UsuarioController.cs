@@ -45,6 +45,25 @@ namespace StockFlowAPI.Controllers
 
 
         // =========================================================
+        // ID USUARIO DESDE JWT
+        // =========================================================
+
+        private long ObtenerIdUsuario()
+        {
+            var claim =
+                User.FindFirst(
+                    ClaimTypes.NameIdentifier
+                )?.Value;
+
+            return long.TryParse(
+                claim,
+                out var idUsuario)
+                    ? idUsuario
+                    : 0;
+        }
+
+
+        // =========================================================
         // CONNECTION STRING
         // =========================================================
 
@@ -171,6 +190,342 @@ namespace StockFlowAPI.Controllers
                     {
                         mensaje =
                             "Ocurrió un error interno al procesar la solicitud."
+                    }
+                );
+            }
+        }
+
+
+        // =========================================================
+        // CONSULTAR MI CUENTA
+        // CUALQUIER USUARIO AUTENTICADO
+        // =========================================================
+
+        [HttpGet]
+        [Route("ConsultarMiCuentaAPI")]
+        public IActionResult ConsultarMiCuentaAPI()
+        {
+            try
+            {
+                var idUsuario =
+                    ObtenerIdUsuario();
+
+                var idEmpresa =
+                    ObtenerIdEmpresa();
+
+
+                if (idUsuario <= 0 ||
+                    idEmpresa <= 0)
+                {
+                    return Unauthorized(new
+                    {
+                        mensaje =
+                            "La sesión no es válida."
+                    });
+                }
+
+
+                using var connection =
+                    new SqlConnection(
+                        ObtenerConnectionString()
+                    );
+
+
+                var cuenta =
+                    connection
+                        .QueryFirstOrDefault
+                        <MiCuentaResponse>(
+                            "SP_ConsultarMiCuenta",
+                            new
+                            {
+                                IdUsuario =
+                                    idUsuario,
+
+                                IdEmpresa =
+                                    idEmpresa
+                            },
+                            commandType:
+                                CommandType
+                                    .StoredProcedure
+                        );
+
+
+                if (cuenta == null)
+                {
+                    return Unauthorized(new
+                    {
+                        mensaje =
+                            "La sesión ya no es válida."
+                    });
+                }
+
+
+                return Ok(cuenta);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error al consultar Mi Cuenta."
+                );
+
+
+                return StatusCode(
+                    StatusCodes
+                        .Status500InternalServerError,
+                    new
+                    {
+                        mensaje =
+                            "Ocurrió un error interno al consultar la cuenta."
+                    }
+                );
+            }
+        }
+
+
+        // =========================================================
+        // CAMBIAR MI CONTRASEÑA
+        // CUALQUIER USUARIO AUTENTICADO
+        // =========================================================
+
+        [HttpPost]
+        [Route("CambiarContrasenaAPI")]
+        public IActionResult CambiarContrasenaAPI(
+            CambiarContrasenaRequest request)
+        {
+            try
+            {
+                var idUsuario =
+                    ObtenerIdUsuario();
+
+                var idEmpresa =
+                    ObtenerIdEmpresa();
+
+
+                if (idUsuario <= 0 ||
+                    idEmpresa <= 0)
+                {
+                    return Unauthorized(new
+                    {
+                        mensaje =
+                            "La sesión no es válida."
+                    });
+                }
+
+
+                using var connection =
+                    new SqlConnection(
+                        ObtenerConnectionString()
+                    );
+
+
+                var hashActual =
+                    connection
+                        .QueryFirstOrDefault<string>(
+                            "SP_ConsultarHashUsuario",
+                            new
+                            {
+                                IdUsuario =
+                                    idUsuario,
+
+                                IdEmpresa =
+                                    idEmpresa
+                            },
+                            commandType:
+                                CommandType
+                                    .StoredProcedure
+                        );
+
+
+                if (string.IsNullOrWhiteSpace(
+                    hashActual))
+                {
+                    return Unauthorized(new
+                    {
+                        mensaje =
+                            "La sesión ya no es válida."
+                    });
+                }
+
+
+                bool contrasenaActualCorrecta;
+
+
+                try
+                {
+                    contrasenaActualCorrecta =
+                        BCrypt.Net.BCrypt.Verify(
+                            request.ContrasenaActual,
+                            hashActual
+                        );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "El hash almacenado para el usuario {IdUsuario} no es válido.",
+                        idUsuario
+                    );
+
+
+                    return StatusCode(
+                        StatusCodes
+                            .Status500InternalServerError,
+                        new
+                        {
+                            mensaje =
+                                "Ocurrió un error interno al procesar la solicitud."
+                        }
+                    );
+                }
+
+
+                if (!contrasenaActualCorrecta)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje =
+                            "La contraseña actual no es correcta."
+                    });
+                }
+
+
+                if (BCrypt.Net.BCrypt.Verify(
+                    request.ContrasenaNueva,
+                    hashActual))
+                {
+                    return BadRequest(new
+                    {
+                        mensaje =
+                            "La nueva contraseña debe ser diferente de la contraseña actual."
+                    });
+                }
+
+
+                var contrasenaNuevaHash =
+                    BCrypt.Net.BCrypt.HashPassword(
+                        request.ContrasenaNueva
+                    );
+
+
+                var parametros =
+                    new DynamicParameters();
+
+
+                parametros.Add(
+                    "@IdUsuario",
+                    idUsuario
+                );
+
+
+                parametros.Add(
+                    "@IdEmpresa",
+                    idEmpresa
+                );
+
+
+                parametros.Add(
+                    "@ContrasenaNueva",
+                    contrasenaNuevaHash
+                );
+
+
+                parametros.Add(
+                    "@Resultado",
+                    dbType:
+                        DbType.Int32,
+                    direction:
+                        ParameterDirection.Output
+                );
+
+
+                parametros.Add(
+                    "@Mensaje",
+                    dbType:
+                        DbType.String,
+                    size:
+                        200,
+                    direction:
+                        ParameterDirection.Output
+                );
+
+
+                connection.Execute(
+                    "SP_CambiarContrasenaPropia",
+                    parametros,
+                    commandType:
+                        CommandType.StoredProcedure
+                );
+
+
+                var resultado =
+                    parametros.Get<int>(
+                        "@Resultado"
+                    );
+
+
+                var mensaje =
+                    parametros.Get<string>(
+                        "@Mensaje"
+                    );
+
+
+                if (resultado == 1)
+                {
+                    return Ok(new
+                    {
+                        mensaje
+                    });
+                }
+
+
+                if (resultado == -1)
+                {
+                    return Unauthorized(new
+                    {
+                        mensaje
+                    });
+                }
+
+
+                if (resultado == -2)
+                {
+                    return BadRequest(new
+                    {
+                        mensaje
+                    });
+                }
+
+
+                if (resultado == -99)
+                {
+                    return ErrorInternoSP(
+                        "SP_CambiarContrasenaPropia",
+                        mensaje
+                    );
+                }
+
+
+                return ErrorInternoSP(
+                    "SP_CambiarContrasenaPropia",
+                    mensaje
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error inesperado al cambiar la contraseña del usuario actual."
+                );
+
+
+                return StatusCode(
+                    StatusCodes
+                        .Status500InternalServerError,
+                    new
+                    {
+                        mensaje =
+                            "Ocurrió un error interno al cambiar la contraseña."
                     }
                 );
             }

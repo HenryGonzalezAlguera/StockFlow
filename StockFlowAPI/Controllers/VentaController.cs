@@ -157,12 +157,15 @@ namespace StockFlowAPI.Controllers
                 if (request.Detalles.Any(
                     x =>
                         x.IdProducto <= 0 ||
-                        x.Cantidad <= 0))
+                        x.Cantidad <= 0 ||
+                        x.Cantidad != decimal.Truncate(
+                            x.Cantidad
+                        )))
                 {
                     return BadRequest(new
                     {
                         mensaje =
-                            "Los productos y cantidades de la venta no son válidos."
+                            "Los productos y cantidades enteras de la venta no son válidos."
                     });
                 }
 

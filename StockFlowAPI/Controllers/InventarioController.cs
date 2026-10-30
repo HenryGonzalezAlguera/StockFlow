@@ -479,12 +479,15 @@ namespace StockFlowAPI.Controllers
                 }
 
 
-                if (request.Cantidad <= 0)
+                if (request.Cantidad <= 0 ||
+                    request.Cantidad != decimal.Truncate(
+                        request.Cantidad
+                    ))
                 {
                     return BadRequest(new
                     {
                         mensaje =
-                            "La cantidad debe ser mayor a cero."
+                            "La cantidad debe ser un número entero mayor a cero."
                     });
                 }
 

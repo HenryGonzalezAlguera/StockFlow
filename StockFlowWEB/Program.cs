@@ -62,7 +62,7 @@ builder.Services.AddHttpClient(
             );
 
         client.Timeout =
-            TimeSpan.FromSeconds(30);
+            TimeSpan.FromSeconds(120);
     }
 );
 

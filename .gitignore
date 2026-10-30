@@ -83,3 +83,11 @@ Thumbs.db
 
 *.log
 logs/
+
+# ==========================================
+# Visual Studio publish user settings
+# ==========================================
+
+**/Properties/PublishProfiles/
+*.pubxml
+*.pubxml.user

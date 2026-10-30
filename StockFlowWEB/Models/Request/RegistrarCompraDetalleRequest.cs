@@ -3,15 +3,16 @@
 namespace StockFlowWEB.Models.Request
 {
     public class RegistrarCompraDetalleRequest
+        : IValidatableObject
     {
         [Range(1, long.MaxValue)]
         public long IdProducto { get; set; }
 
 
         [Range(
-            0.001,
+            1,
             double.MaxValue,
-            ErrorMessage = "La cantidad debe ser mayor a cero."
+            ErrorMessage = "La cantidad debe ser un número entero mayor a cero."
         )]
         public decimal Cantidad { get; set; }
 
@@ -22,5 +23,29 @@ namespace StockFlowWEB.Models.Request
             ErrorMessage = "El costo debe ser mayor a cero."
         )]
         public decimal PrecioUnitario { get; set; }
+
+
+        public IEnumerable<ValidationResult>
+            Validate(
+                ValidationContext validationContext)
+        {
+            if (
+                Cantidad
+                !=
+                decimal.Truncate(
+                    Cantidad
+                )
+            )
+            {
+                yield return
+                    new ValidationResult(
+                        "La cantidad debe ser un número entero.",
+                        new[]
+                        {
+                            nameof(Cantidad)
+                        }
+                    );
+            }
+        }
     }
 }

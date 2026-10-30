@@ -104,7 +104,7 @@ namespace StockFlowWEB.Controllers
             decimal cantidad)
         {
             return cantidad.ToString(
-                "0.###",
+                "0",
                 Cultura
             );
         }

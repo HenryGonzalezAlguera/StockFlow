@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.RateLimiting;
 
 
 var builder =
@@ -202,6 +204,102 @@ builder.Services.AddAuthorization();
 
 
 // =========================================================
+// RATE LIMITING - ENDPOINTS PÚBLICOS
+// =========================================================
+
+builder.Services.AddRateLimiter(
+    options =>
+    {
+        options.RejectionStatusCode =
+            StatusCodes.Status429TooManyRequests;
+
+
+        options.OnRejected =
+            async (context, cancellationToken) =>
+            {
+                context.HttpContext
+                    .Response.ContentType =
+                        "application/json";
+
+                await context.HttpContext
+                    .Response.WriteAsJsonAsync(
+                        new
+                        {
+                            mensaje =
+                                "Se realizaron demasiadas solicitudes. Intente nuevamente más tarde."
+                        },
+                        cancellationToken
+                    );
+            };
+
+
+        options.AddPolicy(
+            "LoginPublico",
+            httpContext =>
+                RateLimitPartition
+                    .GetFixedWindowLimiter(
+                        partitionKey:
+                            httpContext.Connection
+                                .RemoteIpAddress?
+                                .ToString()
+                            ??
+                            "sin-ip",
+
+                        factory:
+                            _ =>
+                                new FixedWindowRateLimiterOptions
+                                {
+                                    PermitLimit = 30,
+
+                                    Window =
+                                        TimeSpan.FromMinutes(
+                                            1
+                                        ),
+
+                                    QueueLimit = 0,
+
+                                    AutoReplenishment =
+                                        true
+                                }
+                    )
+        );
+
+
+        options.AddPolicy(
+            "RegistroEmpresaPublico",
+            httpContext =>
+                RateLimitPartition
+                    .GetFixedWindowLimiter(
+                        partitionKey:
+                            httpContext.Connection
+                                .RemoteIpAddress?
+                                .ToString()
+                            ??
+                            "sin-ip",
+
+                        factory:
+                            _ =>
+                                new FixedWindowRateLimiterOptions
+                                {
+                                    PermitLimit = 5,
+
+                                    Window =
+                                        TimeSpan.FromHours(
+                                            1
+                                        ),
+
+                                    QueueLimit = 0,
+
+                                    AutoReplenishment =
+                                        true
+                                }
+                    )
+        );
+    }
+);
+
+
+// =========================================================
 // CONTROLLERS
 //
 // Personalizamos los errores automáticos de DataAnnotations.
@@ -283,6 +381,11 @@ if (app.Environment.IsDevelopment())
 // =========================================================
 
 app.UseHttpsRedirection();
+
+
+// Rate limiting antes de ejecutar endpoints.
+
+app.UseRateLimiter();
 
 
 // JWT:

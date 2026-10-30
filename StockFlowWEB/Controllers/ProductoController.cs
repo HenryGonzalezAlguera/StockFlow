@@ -271,6 +271,7 @@ namespace StockFlowWEB.Controllers
         // REGISTRAR - GET
         // =========================================================
 
+        [SessionAuthorize("Administrador", "Empleado")]
         [HttpGet]
         public IActionResult Registrar()
         {
@@ -314,6 +315,7 @@ namespace StockFlowWEB.Controllers
         // SQL SERVER LO GENERA AUTOMÁTICAMENTE.
         // =========================================================
 
+        [SessionAuthorize("Administrador", "Empleado")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Registrar(
@@ -494,6 +496,7 @@ namespace StockFlowWEB.Controllers
         // MODIFICAR - GET
         // =========================================================
 
+        [SessionAuthorize("Administrador", "Empleado")]
         [HttpGet]
         public IActionResult Modificar(
             long id)
@@ -658,6 +661,7 @@ namespace StockFlowWEB.Controllers
         // NO SE PUEDE CAMBIAR.
         // =========================================================
 
+        [SessionAuthorize("Administrador", "Empleado")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Modificar(
@@ -978,6 +982,7 @@ namespace StockFlowWEB.Controllers
         // SOLO ADMINISTRADOR EN API
         // =========================================================
 
+        [SessionAuthorize("Administrador")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CambiarEstado(

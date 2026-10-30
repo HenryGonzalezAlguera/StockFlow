@@ -4,6 +4,7 @@ using StockFlowWEB.Models.Response;
 namespace StockFlowWEB.Models.ViewModels
 {
     public class AjusteInventarioViewModel
+        : IValidatableObject
     {
         [Range(
             1,
@@ -21,9 +22,9 @@ namespace StockFlowWEB.Models.ViewModels
 
 
         [Range(
-            0.001,
+            1,
             double.MaxValue,
-            ErrorMessage = "La cantidad debe ser mayor a cero."
+            ErrorMessage = "La cantidad debe ser un número entero mayor a cero."
         )]
         public decimal Cantidad { get; set; }
 
@@ -38,5 +39,29 @@ namespace StockFlowWEB.Models.ViewModels
 
         public List<ProductoResponse> Productos { get; set; }
             = new List<ProductoResponse>();
+
+
+        public IEnumerable<ValidationResult>
+            Validate(
+                ValidationContext validationContext)
+        {
+            if (
+                Cantidad
+                !=
+                decimal.Truncate(
+                    Cantidad
+                )
+            )
+            {
+                yield return
+                    new ValidationResult(
+                        "La cantidad debe ser un número entero.",
+                        new[]
+                        {
+                            nameof(Cantidad)
+                        }
+                    );
+            }
+        }
     }
 }

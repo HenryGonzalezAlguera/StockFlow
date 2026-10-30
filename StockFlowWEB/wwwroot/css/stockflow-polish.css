@@ -1,0 +1,503 @@
+/*
+=========================================================
+StockFlow - Fase L.2 v2
+Pulido visual final robusto
+=========================================================
+Se carga DESPUÉS de site.css.
+No reemplaza reglas de negocio ni vistas.
+=========================================================
+*/
+
+/* ---------------------------------------------------------
+   1. LEGIBILIDAD Y JERARQUÍA
+--------------------------------------------------------- */
+html {
+    font-size: 15px;
+}
+
+body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+main h1,
+.page-header h1 {
+    font-size: 1.72rem;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    font-weight: 750;
+}
+
+.page-header p,
+.content-card-header p,
+.form-text,
+.text-muted {
+    line-height: 1.45;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-control,
+.form-select {
+    font-size: 0.93rem;
+}
+
+.form-control::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+}
+
+/* Topbar un poco más definida */
+.topbar,
+header.navbar,
+.navbar {
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+}
+
+/* ---------------------------------------------------------
+   2. TARJETAS / KPIs
+--------------------------------------------------------- */
+.content-card,
+.kpi-card {
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: #d9ddec;
+    box-shadow:
+        0 12px 28px rgba(15, 23, 42, 0.065),
+        0 2px 6px rgba(15, 23, 42, 0.04);
+}
+
+.kpi-value {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tarjetas detectadas automáticamente por stockflow-polish.js */
+.sf-report-card {
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+}
+
+.sf-report-card::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        rgba(79, 70, 229, 0),
+        rgba(79, 70, 229, .52),
+        rgba(79, 70, 229, 0)
+    );
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform .20s ease;
+}
+
+.sf-report-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(79, 70, 229, .24);
+    box-shadow:
+        0 16px 34px rgba(15, 23, 42, .08),
+        0 4px 10px rgba(15, 23, 42, .04);
+}
+
+.sf-report-card:hover::after {
+    transform: scaleX(1);
+}
+
+.sf-report-card a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.sf-report-card a .bi-arrow-right,
+.sf-report-card a::after {
+    transition: transform .18s ease;
+}
+
+.sf-report-card:hover a .bi-arrow-right {
+    transform: translateX(4px);
+}
+
+/* ---------------------------------------------------------
+   3. TABLAS
+--------------------------------------------------------- */
+.table-modern,
+.table {
+    font-variant-numeric: tabular-nums;
+}
+
+.table-modern thead th {
+    color: #64748b;
+    background: #f8fafc;
+    font-size: .73rem;
+    letter-spacing: .025em;
+    white-space: nowrap;
+}
+
+.table-modern tbody tr,
+.table tbody tr {
+    transition:
+        background-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.table-modern tbody tr:hover > td,
+.table tbody tr:hover > td {
+    background-color: #f8f9ff;
+}
+
+.table-modern tbody tr:hover > td:first-child,
+.table tbody tr:hover > td:first-child {
+    box-shadow: inset 3px 0 0 rgba(79, 70, 229, .55);
+}
+
+.table-modern tbody td {
+    line-height: 1.42;
+}
+
+.table-modern tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* ---------------------------------------------------------
+   4. BOTONES / MICROINTERACCIONES
+--------------------------------------------------------- */
+.btn {
+    transition:
+        transform .14s ease,
+        box-shadow .14s ease,
+        background-color .14s ease,
+        border-color .14s ease,
+        color .14s ease;
+}
+
+.btn:not(:disabled):not(.disabled):hover {
+    transform: translateY(-1px);
+}
+
+.btn:not(:disabled):not(.disabled):active {
+    transform: translateY(0) scale(.985);
+}
+
+.btn-primary:not(:disabled):hover {
+    box-shadow: 0 7px 18px rgba(37, 99, 235, .20);
+}
+
+.btn-outline-secondary:not(:disabled):hover,
+.btn-outline-danger:not(:disabled):hover {
+    box-shadow: 0 5px 14px rgba(15, 23, 42, .07);
+}
+
+/* foco visible */
+.form-control:focus,
+.form-select:focus,
+.btn:focus-visible,
+a:focus-visible {
+    outline: none;
+    border-color: rgba(79, 70, 229, .6);
+    box-shadow: 0 0 0 .2rem rgba(79, 70, 229, .12);
+}
+
+/* sidebar */
+.sidebar-link,
+.sidebar a {
+    transition:
+        background-color .15s ease,
+        color .15s ease,
+        transform .15s ease;
+}
+
+.sidebar-link:hover,
+.sidebar a:hover {
+    transform: translateX(2px);
+}
+
+.sidebar-link.active:hover,
+.sidebar a.active:hover {
+    transform: none;
+}
+
+/* ---------------------------------------------------------
+   5. CONSISTENCIA NUMÉRICA VISUAL
+--------------------------------------------------------- */
+.badge,
+.badge-stock,
+.kpi-value,
+.table,
+.table-modern,
+input[type="number"] {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------
+   6. TOASTS
+--------------------------------------------------------- */
+.sf-toast-stack {
+    position: fixed;
+    top: 84px;
+    right: 22px;
+    z-index: 5000;
+    width: min(390px, calc(100vw - 32px));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.sf-toast {
+    --accent: #2563eb;
+    --icon-bg: #eff6ff;
+    --icon-color: #2563eb;
+
+    pointer-events: auto;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) 30px;
+    gap: 11px;
+    align-items: start;
+
+    padding: 13px 12px 13px 13px;
+    background: rgba(255,255,255,.99);
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+
+    box-shadow:
+        0 18px 45px rgba(15,23,42,.15),
+        0 4px 12px rgba(15,23,42,.06);
+
+    opacity: 0;
+    transform: translateY(-9px) translateX(10px);
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease;
+}
+
+.sf-toast.sf-toast-show {
+    opacity: 1;
+    transform: translate(0,0);
+}
+
+.sf-toast.sf-toast-hide {
+    opacity: 0;
+    transform: translateX(18px);
+}
+
+.sf-toast--success {
+    --accent: #16a34a;
+    --icon-bg: #ecfdf5;
+    --icon-color: #16a34a;
+}
+
+.sf-toast--danger {
+    --accent: #dc2626;
+    --icon-bg: #fef2f2;
+    --icon-color: #dc2626;
+}
+
+.sf-toast--warning {
+    --accent: #d97706;
+    --icon-bg: #fff7ed;
+    --icon-color: #d97706;
+}
+
+.sf-toast-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: var(--icon-bg);
+    color: var(--icon-color);
+    font-size: 1rem;
+}
+
+.sf-toast-content {
+    min-width: 0;
+}
+
+.sf-toast-title {
+    margin: 0 0 2px;
+    font-size: .9rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.sf-toast-message {
+    margin: 0;
+    color: #475569;
+    font-size: .84rem;
+    line-height: 1.42;
+    overflow-wrap: anywhere;
+}
+
+.sf-toast-close {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #94a3b8;
+    display: grid;
+    place-items: center;
+    padding: 0;
+}
+
+.sf-toast-close:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+/* ---------------------------------------------------------
+   7. RESPONSIVE
+--------------------------------------------------------- */
+@media (max-width: 991.98px) {
+    .sf-toast-stack {
+        top: 78px;
+        right: 16px;
+    }
+
+    .kpi-card:hover,
+    .sf-report-card:hover,
+    .sidebar-link:hover,
+    .sidebar a:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    html {
+        font-size: 14px;
+    }
+
+    .sf-toast-stack {
+        top: 72px;
+        left: 12px;
+        right: 12px;
+        width: auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+    }
+
+    .btn,
+    .kpi-card,
+    .content-card,
+    .sf-report-card,
+    .table-modern tbody tr,
+    .table tbody tr,
+    .sidebar-link,
+    .sidebar a,
+    .sf-toast {
+        transition: none !important;
+    }
+
+    .btn:hover,
+    .kpi-card:hover,
+    .sf-report-card:hover,
+    .sidebar-link:hover,
+    .sidebar a:hover {
+        transform: none !important;
+    }
+}
+
+
+/* =========================================================
+   FASE L.2 - AJUSTE FINAL
+   Ventas/Tablas + Dashboard
+========================================================= */
+
+/* TABLAS:
+   Forzar que se resalte TODA la fila, no solamente botones o celdas puntuales.
+*/
+.table-modern tbody tr:hover > td,
+.table.table-modern tbody tr:hover > td,
+.table tbody tr:hover > td {
+    background-color: #f4f5ff !important;
+    transition:
+        background-color .15s ease,
+        box-shadow .15s ease;
+}
+
+.table-modern tbody tr:hover > td:first-child,
+.table.table-modern tbody tr:hover > td:first-child,
+.table tbody tr:hover > td:first-child {
+    box-shadow: inset 3px 0 0 #6366f1 !important;
+}
+
+/* Mantener botones legibles dentro de la fila */
+.table-modern tbody tr:hover .btn-light,
+.table tbody tr:hover .btn-light {
+    background-color: #ffffff !important;
+    border-color: #e5e7eb !important;
+}
+
+/* DASHBOARD:
+   La elevación ahora es deliberadamente más visible.
+*/
+.kpi-card {
+    position: relative;
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease,
+        border-color .18s ease !important;
+    will-change: transform;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px) !important;
+    z-index: 3;
+    border-color: rgba(79, 70, 229, .24) !important;
+    box-shadow:
+        0 16px 32px rgba(15, 23, 42, .10),
+        0 5px 12px rgba(15, 23, 42, .05) !important;
+}
+
+/* Icono del KPI acompaña ligeramente el hover */
+.kpi-card .kpi-icon {
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease !important;
+}
+
+.kpi-card:hover .kpi-icon {
+    transform: scale(1.06);
+}
+
+/* Reportes: conservar el efecto que ya funciona */
+.sf-report-card:hover {
+    transform: translateY(-4px);
+}
+
+/* En dispositivos táctiles no se fuerza hover */
+@media (hover: none) {
+    .kpi-card:hover,
+    .sf-report-card:hover {
+        transform: none !important;
+    }
+
+    .table-modern tbody tr:hover > td,
+    .table tbody tr:hover > td {
+        background-color: inherit !important;
+    }
+}
