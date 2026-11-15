@@ -25,6 +25,10 @@ A new isolated tenant can be created directly from the **Create a company** opti
 
 ![StockFlow Dashboard](docs/screenshots/dashboard.png)
 
+## Portfolio & LinkedIn
+
+[Ready-to-publish LinkedIn copy, real screenshots, and demo checklist](docs/PUBLICACION_LINKEDIN.md). This is a **portfolio demonstration** hosted on limited Azure free-tier resources, not a continuously available commercial production service.
+
 ## Overview
 
 StockFlow is a production-oriented business management application designed for small and medium-sized companies that need centralized control over inventory, purchases, sales, customers, suppliers, users, and operational reporting.
